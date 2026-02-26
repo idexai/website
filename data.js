@@ -98,7 +98,7 @@ const instructors = [
     { name: "AYSU DERİCİOĞLU EGEMEN", role: { tr: "YARI ZAMANLI ÖĞRETİM GÖREVLİSİ", en: "Part-time Instructor" }, image: "assets/instructors/aysu_dericioglu.png" },
     { name: "GAMZE GÜVEN", role: { tr: "YARI ZAMANLI ÖĞRETİM GÖREVLİSİ", en: "Part-time Instructor" }, image: "assets/instructors/gamze_guven.png" },
     { name: "SEYMAN ÇAY", role: { tr: "YARI ZAMANLI ÖĞRETİM GÖREVLİSİ", en: "Part-time Instructor" }, image: "assets/instructors/seyman_cay.png" },
-    { name: "SONAY ARDI AKKAR", role: { tr: "YARI ZAMANLI ÖĞRETİM GÖREVLİSİ", en: "Part-time Instructor" }, image: "assets/instructors/placeholder.svg" },
+    { name: "SONAY ARDI AKKAR", role: { tr: "YARI ZAMANLI ÖĞRETİM GÖREVLİSİ", en: "Part-time Instructor" }, image: "assets/instructors/sonay_ardi.png" },
     { name: "EDA SARMAN", role: { tr: "ÖĞRETİM ASİSTANI", en: "Teaching Assistant" }, image: "assets/instructors/placeholder.svg" },
     { name: "ELİF DOĞRUL", role: { tr: "ÖĞRETİM ASİSTANI", en: "Teaching Assistant" }, image: "assets/instructors/placeholder.svg" },
     { name: "HALİL DOĞAN", role: { tr: "ÖĞRETİM ASİSTANI", en: "Teaching Assistant" }, image: "assets/instructors/placeholder.svg" }
