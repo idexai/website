@@ -1,0 +1,844 @@
+:root {
+    --bg: #030303;
+    --bg-soft: #0a0a0c;
+    --text: #e5e5e5;
+    --text-dim: #9ca3af;
+    --line: rgba(255, 255, 255, 0.08);
+    --accent: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    width: min(90%, 1280px);
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.text-white {
+    color: #fff;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.min-h-screen {
+    min-height: 100vh;
+}
+
+.noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.03;
+    background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+}
+
+.guide-lines {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.guide-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.site-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 40;
+    background: rgba(3, 3, 3, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nav-inner {
+    position: relative;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.nav-logos {
+    opacity: 0.8;
+}
+
+.logo-uni {
+    height: auto;
+    width: 6em;
+}
+
+.nav-brand {
+    display: flex;
+    justify-content: center;
+}
+
+.logo-idexai {
+    height: auto;
+    width: 5em;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.68rem;
+}
+
+.nav-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color .25s ease;
+}
+
+.nav-links a:hover,
+.nav-link-emphasis {
+    color: #fff !important;
+}
+
+.lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
+
+.lang-switch span {
+    color: #4b5563;
+}
+
+.lang-btn {
+    border: 0;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    font: inherit;
+}
+
+.lang-btn.active {
+    color: #fff;
+}
+
+.lang-switch-desktop {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 1.2rem;
+    margin-left: 1.2rem;
+}
+
+.desktop-only {
+    display: none;
+}
+
+.mobile-only {
+    display: flex;
+}
+
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 8rem 0 6rem;
+}
+
+.custom-dark-bg {
+    background-image: url("assets/ai-70bk.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: luminosity;
+}
+
+.hero-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: end;
+}
+
+.hero-title {
+    margin: 0 0 2rem;
+    max-width: 90vw;
+    font-size: clamp(2.8rem, 8vw, 7rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.text-transparent {
+    color: transparent;
+}
+
+.border-text {
+    -webkit-text-stroke: 1px #ffffff;
+}
+
+.manifesto-index-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    margin-top: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.hero-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.badge-line {
+    width: 2rem;
+    height: 1px;
+    background: var(--accent);
+}
+
+.hero-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 420px;
+}
+
+.hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .8rem;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: .72rem;
+}
+
+.hero-link-icon {
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.museum-img-wrapper img {
+    filter: grayscale(100%) contrast(1.2);
+    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.museum-img-wrapper:hover img {
+    filter: grayscale(0%) contrast(1);
+    transform: scale(1.03);
+}
+
+.section {
+    position: relative;
+    z-index: 10;
+    padding: 8rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.section-alt {
+    background: rgba(10, 10, 12, 0.5);
+}
+
+.section-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+}
+
+.section-grid-header {
+    margin-bottom: 5rem;
+}
+
+.section-no {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 200;
+    color: rgba(255, 255, 255, 0.12);
+}
+
+.section-label {
+    margin: 1rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.seed-card {
+    margin-bottom: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1.5rem;
+}
+
+.seed-title {
+    margin: 0 0 0.75rem;
+    color: #fff;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+}
+
+.seed-desc {
+    margin: 0;
+    color: #d1d5db;
+    line-height: 1.8;
+    max-width: 68ch;
+    font-size: 0.94rem;
+}
+
+.manifesto-title {
+    margin: 0 0 4rem;
+    max-width: 980px;
+    color: #fff;
+    line-height: 1.2;
+    font-size: 2em;
+    font-weight: 300;
+}
+
+.manifesto-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.2rem;
+    color: #9ca3af;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    font-weight: 300;
+    text-align: justify;
+}
+
+.manifesto-quote-wrap {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 1.4rem;
+}
+
+.manifesto-quote {
+    margin: 0;
+    color: #fff;
+    font-style: italic;
+    font-size: 1rem;
+    text-align: justify;
+}
+
+.team-title {
+    margin: 0;
+    font-size: clamp(1.6rem, 3.8vw, 2rem);
+    font-weight: 300;
+}
+
+.title-row {
+    display: flex;
+    align-items: flex-end;
+}
+
+.instructors-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.5rem 1.2rem;
+}
+
+.person-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.person-photo {
+    aspect-ratio: 3 / 4;
+    background: #0a0a0c;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.person-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .82;
+}
+
+.person-name {
+    margin: 0 0 .25rem;
+    font-size: .77rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.person-role {
+    margin: 0;
+    font-size: .62rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: right;
+}
+
+.filter-btn {
+    border: 0;
+    background: transparent;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .72rem;
+    cursor: pointer;
+    text-align: right;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    color: #fff;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+.project-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    cursor: pointer;
+}
+
+.project-image-wrap {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    background: #050505;
+    overflow: hidden;
+}
+
+.project-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .74;
+}
+
+.project-meta {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 1rem;
+}
+
+.project-year {
+    color: #6b7280;
+    font-size: .62rem;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+}
+
+.project-title {
+    margin: .3rem 0 .1rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.project-student {
+    margin: 0;
+    color: #9ca3af;
+    font-size: .82rem;
+}
+
+.site-footer {
+    background: #020202;
+    padding: 5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    position: relative;
+    z-index: 10;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.footer-logos {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.footer-logo-uni {
+    height: auto;
+    width: 5em;
+    opacity: .9;
+}
+
+.footer-logo-idexai {
+    height: auto;
+    width: 5em;
+}
+
+.footer-dept {
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    font-size: .7rem;
+}
+
+.footer-tags {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: .7rem;
+}
+
+.footer-tags span:hover {
+    color: #fff;
+    cursor: pointer;
+}
+
+.footer-social {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 0.4rem;
+}
+
+.footer-social a {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color .2s ease;
+}
+
+.footer-social a:hover {
+    color: #fff;
+}
+
+.footer-line {
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 2.5rem 0 1.5rem;
+}
+
+.footer-rights {
+    text-align: center;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: .62rem;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.flex {
+    display: flex;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 3, 3, .95);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 5;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, .7);
+    cursor: pointer;
+    font-size: 2rem;
+}
+
+.modal-image-wrap {
+    flex: 1;
+    min-height: 45vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.modal-side {
+    width: 100%;
+    max-height: 42vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    padding-bottom: 1rem;
+}
+
+.modal-year {
+    display: block;
+    margin-bottom: .45rem;
+    color: #fff;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    font-size: .62rem;
+}
+
+.modal-title {
+    margin: 0 0 .25rem;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 1.8rem;
+}
+
+.modal-designer {
+    margin: 0;
+    color: #9ca3af;
+    font-size: .9rem;
+}
+
+.modal-divider {
+    width: 48px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.modal-subtitle {
+    margin: 0 0 .7rem;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-size: .62rem;
+    color: #6b7280;
+}
+
+.modal-text {
+    margin: 0 0 1.2rem;
+    color: #d1d5db;
+    line-height: 1.7;
+    font-size: .92rem;
+}
+
+.modal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: .9rem 1.2rem;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: .7rem;
+}
+
+.modal-btn:hover {
+    background: #fff;
+    color: #000;
+}
+
+.modal-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .62rem;
+    color: #9ca3af;
+}
+
+.modal-tools span {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: .32rem .5rem;
+}
+
+@media (min-width: 1200px) {
+    .desktop-only {
+        display: flex;
+    }
+
+    .mobile-only {
+        display: none;
+    }
+
+    .logo-uni {
+        height: 2.4rem;
+    }
+
+    .logo-idexai {
+        height: 1.9rem;
+    }
+
+    .nav-brand {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .hero-grid {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    }
+
+    .manifesto-columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 3rem;
+    }
+
+    .instructors-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 3.5rem 1.5rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4rem 2.4rem;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+    }
+
+    .footer-tags {
+        align-items: flex-end;
+        text-align: right;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .desktop-only {
+        display: none;
+    }
+
+    .mobile-only {
+        display: flex;
+    }
+}
+
+@media (min-width: 1024px) {
+    .section-grid {
+        grid-template-columns: minmax(120px, 2fr) minmax(0, 10fr);
+        gap: 4rem;
+    }
+
+    .exhibition-header {
+        grid-template-columns: minmax(120px, 2fr) minmax(0, 7fr) minmax(0, 3fr);
+        align-items: end;
+        margin-bottom: 6rem;
+    }
+
+    .collection-title {
+        margin: 0 0 .8rem;
+        text-transform: uppercase;
+        font-size: clamp(2.4rem, 5vw, 4rem);
+        line-height: 1;
+    }
+
+    .collection-desc {
+        margin: 0;
+        max-width: 380px;
+        color: #9ca3af;
+    }
+
+    .instructors-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4rem 1.5rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5rem 3.5rem;
+    }
+
+    .modal-content {
+        padding: 3rem;
+        flex-direction: row;
+        gap: 3rem;
+    }
+
+    .modal-image-wrap {
+        min-height: auto;
+    }
+
+    .modal-side {
+        width: 400px;
+        max-height: none;
+        overflow: visible;
+        justify-content: center;
+        padding-bottom: 0;
+    }
+
+    .modal-close {
+        top: 2rem;
+        right: 2rem;
+    }
+}

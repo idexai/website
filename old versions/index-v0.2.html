@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDExAI.26 | Özyeğin Üniversitesi Endüstriyel Tasarım</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Custom Tailwind Configuration for "Museum Dark AI" Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        ai: {
+                            black: '#030303',
+                            dark: '#0a0a0c',
+                            border: '#1a1a24',
+                            accent: '#00f0ff', // Cyan - sadece çok ince detaylarda
+                            purple: '#b026ff'  // Mor - sadece glow'larda
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* * ÖNEMLİ: RESPONSIVE ARKA PLAN GÖRSELİ KODU */
+        .custom-dark-bg {
+            background-color: #030303;
+            background-image: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2874&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            /* Parallax - Müze hissiyatı için önemli */
+            background-repeat: no-repeat;
+            background-blend-mode: luminosity;
+            /* Rengi öldürüp sadece dokuyu alır */
+        }
+
+        body {
+            background-color: #030303;
+            color: #e5e5e5;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #030303;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b026ff;
+        }
+
+        .museum-img-wrapper img {
+            filter: grayscale(100%) contrast(1.2);
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .museum-img-wrapper:hover img {
+            filter: grayscale(0%) contrast(1);
+            transform: scale(1.03);
+        }
+
+        .artwork-overlay {
+            opacity: 0;
+            background: linear-gradient(to top, rgba(3, 3, 3, 0.95) 0%, rgba(3, 3, 3, 0.4) 50%, transparent 100%);
+            transition: opacity 0.5s ease;
+        }
+
+        .artwork-card:hover .artwork-overlay {
+            opacity: 1;
+        }
+
+        .guide-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.03);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased selection:bg-white selection:text-black relative">
+
+    <div class="noise-overlay"></div>
+
+    <div class="fixed inset-0 flex justify-evenly pointer-events-none z-0">
+        <div class="guide-line left-[20%]"></div>
+        <div class="guide-line left-[50%]"></div>
+        <div class="guide-line left-[80%]"></div>
+    </div>
+
+    <!-- Minimalist Navbar -->
+    <nav class="fixed w-full z-40 bg-ai-black/80 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+        <div class="max-w-[90%] mx-auto px-4">
+            <div class="flex items-center justify-between h-24">
+                <div class="flex items-center gap-6 z-10">
+                    <div class="flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity">
+                        <div
+                            class="h-6 w-20 border-b border-white/20 flex items-center justify-center text-[9px] uppercase tracking-widest text-white">
+                            OzU Logo</div>
+                        <div
+                            class="h-6 w-20 border-b border-white/20 flex items-center justify-center text-[9px] uppercase tracking-widest text-white">
+                            ENT Logo</div>
+                    </div>
+                </div>
+
+                <div class="absolute left-1/2 transform -translate-x-1/2 font-bold text-xl tracking-[0.2em] text-white">
+                    IDExAI.26
+                </div>
+
+                <div class="hidden md:flex items-center space-x-10 text-[11px] uppercase tracking-[0.15em] z-10">
+                    <a href="#tanitim" data-i18n="nav_manifesto"
+                        class="text-gray-400 hover:text-white transition-colors">Manifesto</a>
+                    <a href="#yurutuculer" data-i18n="nav_curators"
+                        class="text-gray-400 hover:text-white transition-colors">Küratörler</a>
+                    <a href="#sergi" class="text-white relative group">
+                        <span data-i18n="nav_exhibition">Sergi</span>
+                        <span
+                            class="absolute -bottom-2 left-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                    </a>
+                    <!-- Dil Değiştirici -->
+                    <div class="flex items-center gap-2 border-l border-white/20 pl-6 ml-6">
+                        <button onclick="setLanguage('tr')" id="lang-tr"
+                            class="text-white hover:text-white transition-colors">TR</button>
+                        <span class="text-gray-700">|</span>
+                        <button onclick="setLanguage('en')" id="lang-en"
+                            class="text-gray-500 hover:text-white transition-colors">EN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="custom-dark-bg relative min-h-screen flex items-end pb-24 pt-32">
+        <div class="absolute inset-0 bg-gradient-to-t from-ai-black via-ai-black/80 to-ai-black/30"></div>
+
+        <div class="relative z-10 w-full max-w-[90%] mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+                <div class="lg:col-span-9">
+                    <p class="text-ai-accent text-[10px] uppercase tracking-[0.3em] mb-6 flex items-center gap-4">
+                        <span class="w-8 h-[1px] bg-ai-accent"></span>
+                        <span data-i18n="hero_badge">Bahar Dönemi 2026 Pilot Programı</span>
+                    </p>
+                    <h1 data-i18n="hero_title"
+                        class="text-6xl md:text-8xl lg:text-[10rem] font-bold text-white leading-[0.85] tracking-tighter mb-8 uppercase">
+                        Yapay Zeka<br>
+                        <span class="text-transparent border-text"
+                            style="-webkit-text-stroke: 1px rgba(255,255,255,0.3);">İle Tasarımı</span><br>
+                        Yeniden<br>
+                        Düşünmek.
+                    </h1>
+                </div>
+                <div class="lg:col-span-3 flex flex-col justify-end pb-4">
+                    <p data-i18n="hero_desc" class="text-sm text-gray-400 font-light leading-relaxed mb-8">
+                        Özyeğin Üniversitesi Endüstriyel Tasarım Bölümü olarak, 2026 Bahar döneminde 1. sınıftan 4.
+                        sınıfa kadar tüm tasarım stüdyolarını kapsayan dönüştürücü bir pilot program başlatmanın
+                        heyecanını yaşıyoruz.
+                    </p>
+                    <a href="#sergi"
+                        class="group inline-flex items-center gap-4 text-xs uppercase tracking-widest text-white hover:text-ai-accent transition-colors w-fit">
+                        <span data-i18n="hero_btn">Sergiyi İncele</span>
+                        <div
+                            class="w-12 h-12 rounded-full border border-white/20 group-hover:border-ai-accent flex items-center justify-center transition-colors">
+                            <i class="ph ph-arrow-down-right text-lg"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Manifesto / Tanıtım -->
+    <section id="tanitim" class="py-32 relative z-10 border-t border-white/5">
+        <div class="max-w-[90%] mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+                <div class="lg:col-span-2">
+                    <span class="text-4xl md:text-6xl font-extralight text-white/10">01</span>
+                    <h2 data-i18n="section_manifesto" class="text-xs uppercase tracking-[0.2em] text-white mt-4">
+                        Manifesto</h2>
+                </div>
+
+                <div class="lg:col-span-10">
+                    <h3 data-i18n="manifesto_h3"
+                        class="text-3xl md:text-5xl font-light text-white leading-tight mb-16 max-w-4xl">
+                        IDExAI.26, üretken yapay zekânın tasarım sürecinin her aşamasına etkili ve sorumlu şekilde
+                        entegre edilmesini hedefleyen <span class="italic font-normal">yeni bir eğitim modelidir.</span>
+                    </h3>
+
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 gap-12 text-sm text-gray-400 font-light leading-relaxed">
+                        <div>
+                            <p data-i18n="manifesto_p1" class="mb-6">
+                                Program, Beko eski Endüstriyel Tasarım İcra Direktörü Serdal Korkut Avcı’nın
+                                danışmanlığında; bölümümüzün öğretim üyeleri, stüdyo yürütücüleri ve araştırma ekibinin
+                                katkılarıyla yürütülmektedir.
+                            </p>
+                            <p data-i18n="manifesto_p2">
+                                9 Şubat’taki başlangıç buluşmasının ardından, 12–16–17 Şubat tarihlerinde
+                                gerçekleştirilen hızlandırıcı ders (Crash Course) modülleri tamamlanmış; süreç, tüm
+                                sınıf seviyelerinin aynı tema üzerinde yapay zekâ destekli tasarım süreçleri
+                                geliştirdiği ortak stüdyo projesi ile devam etmektedir.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="pl-6 border-l border-white/20">
+                                <p data-i18n="manifesto_quote" class="text-white italic text-base">
+                                    "Bu pilot program, yapay zekâyı yalnızca bir araç olarak değil, tasarım düşüncesinin
+                                    aktif bir bileşeni olarak konumlandıran yeni bir tasarım eğitimi yaklaşımının ilk
+                                    adımını temsil etmektedir."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Küratörler / Yürütücüler -->
+    <section id="yurutuculer" class="py-32 relative z-10 border-t border-white/5 bg-ai-dark/50">
+        <div class="max-w-[90%] mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
+                <div class="lg:col-span-2">
+                    <span class="text-4xl md:text-6xl font-extralight text-white/10">02</span>
+                    <h2 data-i18n="section_team" class="text-xs uppercase tracking-[0.2em] text-white mt-4">Kadro</h2>
+                </div>
+                <div class="lg:col-span-10 flex items-end">
+                    <h3 data-i18n="team_h3" class="text-2xl md:text-3xl font-light text-white">
+                        Sürecin Yürütücüleri ve Küratörleri
+                    </h3>
+                </div>
+            </div>
+
+            <!-- CSS Grid for Instructors -->
+            <div id="instructors-grid"
+                class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-16 lg:col-start-3 lg:col-span-10">
+                <!-- JavaScript ile doldurulacak -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sanal Sergi (Öğrenci Projeleri) -->
+    <section id="sergi" class="py-32 relative z-10 border-t border-white/5 min-h-screen">
+        <div class="max-w-[90%] mx-auto px-4">
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24 items-end">
+                <div class="lg:col-span-2">
+                    <span class="text-4xl md:text-6xl font-extralight text-white/10">03</span>
+                    <h2 data-i18n="section_collection" class="text-xs uppercase tracking-[0.2em] text-white mt-4">
+                        Koleksiyon</h2>
+                </div>
+                <div class="lg:col-span-7">
+                    <h3 data-i18n="collection_h3"
+                        class="text-4xl md:text-6xl font-bold text-white tracking-tight uppercase mb-4">
+                        Öğrenci<br>Projeleri</h3>
+                    <p data-i18n="collection_desc" class="text-gray-400 font-light text-sm max-w-md">1. sınıftan 4.
+                        sınıfa, yapay zeka entegreli stüdyo projelerinin görsel ve belgesel çıktıları.</p>
+                </div>
+                <div class="lg:col-span-3 flex justify-end">
+                    <!-- Zarif Filtre -->
+                    <div class="flex flex-col gap-2 text-xs uppercase tracking-widest text-right"
+                        id="filters-container">
+                        <!-- JS ile dil bazlı render edilecek -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projeler Masonry Vari Grid -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-20">
+                <!-- JavaScript ile doldurulacak -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#020202] py-20 border-t border-white/5 relative z-10">
+        <div class="max-w-[90%] mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-end">
+                <div>
+                    <div class="text-white font-bold text-3xl tracking-[0.2em] mb-4">IDExAI.26</div>
+                    <div data-i18n="footer_dept" class="text-gray-500 text-xs tracking-widest uppercase">Özyeğin
+                        Üniversitesi<br>Endüstriyel Tasarım Bölümü</div>
+                </div>
+                <div
+                    class="md:text-right flex flex-col md:items-end gap-2 text-gray-600 text-xs tracking-[0.15em] uppercase">
+                    <span class="hover:text-white transition-colors cursor-pointer">#IDExAI26</span>
+                    <span class="hover:text-white transition-colors cursor-pointer">#AIxDesign</span>
+                    <span class="hover:text-white transition-colors cursor-pointer">#OzU</span>
+                </div>
+            </div>
+            <div class="w-full h-px bg-white/5 mt-12 mb-6"></div>
+            <div data-i18n="footer_rights" class="text-center text-[10px] text-gray-700 tracking-widest uppercase">
+                © 2026 Özyeğin Üniversitesi. Tüm Hakları Saklıdır.
+            </div>
+        </div>
+    </footer>
+
+    <!-- LIGHTBOX / MODAL -->
+    <div id="project-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-[#030303] bg-opacity-95 backdrop-blur-xl transition-opacity"
+            onclick="closeModal()"></div>
+
+        <div class="relative w-full h-full flex flex-col lg:flex-row p-6 lg:p-12 gap-12">
+            <button onclick="closeModal()"
+                class="absolute top-6 right-6 lg:top-12 lg:right-12 text-white/50 hover:text-white transition-colors z-50">
+                <i class="ph ph-x text-3xl"></i>
+            </button>
+
+            <div class="flex-1 flex items-center justify-center relative group h-[50vh] lg:h-auto">
+                <img id="modal-image" src="" alt="Sunum Paftası"
+                    class="max-w-full max-h-full object-contain shadow-2xl">
+            </div>
+
+            <div
+                class="w-full lg:w-[400px] flex flex-col justify-center gap-8 h-[40vh] lg:h-auto overflow-y-auto no-scrollbar pb-10 lg:pb-0">
+                <div>
+                    <span id="modal-year"
+                        class="text-[10px] uppercase tracking-[0.2em] text-ai-accent mb-2 block">Sınıf</span>
+                    <h3 id="modal-title"
+                        class="text-3xl font-bold text-white leading-tight uppercase tracking-tight mb-2">Proje Adı</h3>
+                    <p class="text-sm text-gray-400 font-light tracking-wide"><span
+                            data-i18n="modal_designer">Tasarımcı</span>: <span id="modal-student"
+                            class="text-white">İsim Soyisim</span></p>
+                </div>
+
+                <div class="w-12 h-px bg-white/20"></div>
+
+                <div>
+                    <h4 data-i18n="modal_process_h4" class="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-3">
+                        Süreç & Metodoloji</h4>
+                    <p data-i18n="modal_process_p" class="text-sm text-gray-300 font-light leading-relaxed mb-6">
+                        Öğrencinin yapay zeka araçlarını tasarım araştırma, fikir geliştirme, prototipleme ve
+                        görselleştirme aşamalarına nasıl entegre ettiğini detaylandıran günlüğü inceleyin.
+                    </p>
+
+                    <a href="#" id="modal-pdf-btn" target="_blank"
+                        class="inline-flex items-center gap-3 text-xs uppercase tracking-widest text-white border border-white/20 px-6 py-4 hover:bg-white hover:text-black transition-all">
+                        <span data-i18n="modal_logbook_btn">Design Logbook Görüntüle</span> <i
+                            class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div>
+                    <h4 data-i18n="modal_tools_h4" class="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-3">
+                        Entegrasyon Araçları</h4>
+                    <div id="modal-tools-container"
+                        class="flex flex-wrap gap-2 text-[10px] uppercase tracking-widest text-gray-400">
+                        <!-- JS tarafından eklenecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data & Interaction Logic -->
+    <script>
+        // ==========================================
+        // DİL ÇEVİRİ SÖZLÜĞÜ (BURADAN DÜZENLEYEBİLİRSİNİZ)
+        // ==========================================
+        const translations = {
+            tr: {
+                nav_manifesto: "Manifesto",
+                nav_curators: "Küratörler",
+                nav_exhibition: "Sergi",
+
+                hero_badge: "Bahar Dönemi 2026 Pilot Programı",
+                hero_title: "Yapay Zeka<br><span class=\"text-transparent border-text\" style=\"-webkit-text-stroke: 1px rgba(255,255,255,0.3);\">İle Tasarımı</span><br>Yeniden<br>Düşünmek.",
+                hero_desc: "Özyeğin Üniversitesi Endüstriyel Tasarım Bölümü olarak, 2026 Bahar döneminde 1. sınıftan 4. sınıfa kadar tüm tasarım stüdyolarını kapsayan dönüştürücü bir pilot program başlatmanın heyecanını yaşıyoruz.",
+                hero_btn: "Sergiyi İncele",
+
+                section_manifesto: "Manifesto",
+                manifesto_h3: "IDExAI.26, üretken yapay zekânın tasarım sürecinin araştırma, fikir geliştirme, konsept oluşturma, prototipleme, test ve iletişim aşamalarına etkili ve sorumlu şekilde entegre edilmesini hedefleyen <span class=\"italic font-normal\">yeni bir eğitim modelidir.</span>",
+                manifesto_p1: "Program, Beko eski Endüstriyel Tasarım İcra Direktörü Serdal Korkut Avcı’nın danışmanlığında; bölümümüzün öğretim üyeleri, stüdyo yürütücüleri ve araştırma ekibinin katkılarıyla yürütülmektedir.",
+                manifesto_p2: "9 Şubat’taki başlangıç buluşmasının ardından, 12–16–17 Şubat tarihlerinde gerçekleştirilen hızlandırıcı ders (Crash Course) modülleri tamamlanmış; süreç, tüm sınıf seviyelerinin aynı tema üzerinde yapay zekâ destekli tasarım süreçleri geliştirdiği ortak stüdyo projesi ile devam etmektedir.",
+                manifesto_quote: "\"Bu pilot program, yapay zekâyı yalnızca bir araç olarak değil, tasarım düşüncesinin aktif bir bileşeni olarak konumlandıran yeni bir tasarım eğitimi yaklaşımının ilk adımını temsil etmektedir.\"",
+
+                section_team: "Kadro",
+                team_h3: "Sürecin Yürütücüleri ve Küratörleri",
+
+                section_collection: "Koleksiyon",
+                collection_h3: "Öğrenci<br>Projeleri",
+                collection_desc: "1. sınıftan 4. sınıfa, yapay zeka entegreli stüdyo projelerinin görsel ve belgesel çıktıları.",
+
+                filter_all: "Tümü (100+)",
+                filter_y1: "1. Sınıf",
+                filter_y2: "2. Sınıf",
+                filter_y3: "3. Sınıf",
+                filter_y4: "4. Sınıf",
+
+                footer_dept: "Özyeğin Üniversitesi<br>Endüstriyel Tasarım Bölümü",
+                footer_rights: "© 2026 Özyeğin Üniversitesi. Tüm Hakları Saklıdır.",
+
+                modal_designer: "Tasarımcı",
+                modal_process_h4: "Süreç & Metodoloji",
+                modal_process_p: "Öğrencinin yapay zeka araçlarını tasarım araştırma, fikir geliştirme, prototipleme ve görselleştirme aşamalarına nasıl entegre ettiğini detaylandıran günlüğü inceleyin.",
+                modal_logbook_btn: "Design Logbook Görüntüle",
+                modal_tools_h4: "Entegrasyon Araçları",
+
+                card_examine: "İncele"
+            },
+            en: {
+                nav_manifesto: "Manifesto",
+                nav_curators: "Curators",
+                nav_exhibition: "Exhibition",
+
+                hero_badge: "Spring Semester 2026 Pilot Program",
+                hero_title: "Rethinking<br><span class=\"text-transparent border-text\" style=\"-webkit-text-stroke: 1px rgba(255,255,255,0.3);\">Design With</span><br>Artificial<br>Intelligence.",
+                hero_desc: "As the Industrial Design Department at Özyeğin University, we are excited to launch a transformative pilot program in the Spring 2026 semester, encompassing all design studio courses from Year 1 to Year 4.",
+                hero_btn: "Explore Exhibition",
+
+                section_manifesto: "Manifesto",
+                manifesto_h3: "IDExAI.26 is a new educational model that aims to integrate generative artificial intelligence effectively and responsibly into all stages of the design process, <span class=\"italic font-normal\">including research, ideation, concept development, prototyping, testing, and communication.</span>",
+                manifesto_p1: "The program is conducted under the advisory of Serdal Korkut Avcı, former Executive Industrial Design Director at Beko, with the contributions of all studio instructors, faculty members, and the research team of our department.",
+                manifesto_p2: "Following the kick-off meeting held on February 9, the intensive Crash Course modules conducted on February 12, 16, and 17 have been completed. The process continues with a shared studio project in which students across all class levels develop AI-supported design processes around a common theme.",
+                manifesto_quote: "\"This pilot program represents the first step toward a new design education approach that positions artificial intelligence not merely as a tool, but as an active component of design thinking.\"",
+
+                section_team: "Team",
+                team_h3: "Process Instructors and Curators",
+
+                section_collection: "Collection",
+                collection_h3: "Student<br>Projects",
+                collection_desc: "Visual and documentary outputs of AI-integrated studio projects from Year 1 to Year 4.",
+
+                filter_all: "All (100+)",
+                filter_y1: "Year 1",
+                filter_y2: "Year 2",
+                filter_y3: "Year 3",
+                filter_y4: "Year 4",
+
+                footer_dept: "Özyeğin University<br>Industrial Design Department",
+                footer_rights: "© 2026 Özyeğin University. All Rights Reserved.",
+
+                modal_designer: "Designer",
+                modal_process_h4: "Process & Methodology",
+                modal_process_p: "Explore the diary detailing how the student integrated AI tools into design research, ideation, prototyping, and visualization stages.",
+                modal_logbook_btn: "View Design Logbook",
+                modal_tools_h4: "Integration Tools",
+
+                card_examine: "Examine"
+            }
+        };
+
+        // ==========================================
+        // YÜRÜTÜCÜLER DATASI (İki dilli roller eklendi)
+        // ==========================================
+        const instructors = [
+            { name: "Prof. Dr. Alpay Er", role: { tr: "Endüstriyel Tasarım Bölüm Başkanı", en: "Head of Industrial Design Department" } },
+            { name: "Serdal Korkut Avcı", role: { tr: "Proje Danışmanı, Yarı Zamanlı Öğr. Gör.", en: "Project Advisor, Part-time Instructor" } },
+            { name: "Arş. Gör. Ulaş Tigin", role: { tr: "Proje Araştırma Asistanı", en: "Project Research Assistant" } },
+            { name: "Prof. Dr. Şebnem Timur", role: { tr: "Stüdyo Ders Yürütücüsü", en: "Studio Instructor" } },
+            { name: "Dr. Öğr. Üyesi Zeynep Karapars", role: { tr: "Stüdyo Ders Yürütücüsü", en: "Studio Instructor" } },
+            { name: "Öğr. Gör. Dr. Emrah Özturan", role: { tr: "Stüdyo Ders Yürütücüsü", en: "Studio Instructor" } },
+            { name: "Öğr. Gör. Ali Gökkurt", role: { tr: "Stüdyo Ders Yürütücüsü", en: "Studio Instructor" } },
+            { name: "Öğr. Gör. Tuğba Tok", role: { tr: "Stüdyo Ders Yürütücüsü", en: "Studio Instructor" } },
+            { name: "Arş. Gör. Pelin Günay", role: { tr: "Stüdyo Ders Yürütücüsü", en: "Studio Instructor" } },
+            { name: "Aysu Dericioğlu Egemen", role: { tr: "Yarı Zamanlı Öğretim Görevlisi", en: "Part-time Instructor" } },
+            { name: "Gamze Güven", role: { tr: "Yarı Zamanlı Öğretim Görevlisi", en: "Part-time Instructor" } },
+            { name: "Seyman Çay", role: { tr: "Yarı Zamanlı Öğretim Görevlisi", en: "Part-time Instructor" } },
+            { name: "Sonay Ardi Akkar", role: { tr: "Yarı Zamanlı Öğretim Görevlisi", en: "Part-time Instructor" } },
+            { name: "Eda Sarman", role: { tr: "Öğretim Asistanı", en: "Teaching Assistant" } },
+            { name: "Elif Doğrul", role: { tr: "Öğretim Asistanı", en: "Teaching Assistant" } },
+            { name: "Halil Doğan", role: { tr: "Öğretim Asistanı", en: "Teaching Assistant" } }
+        ];
+
+        // ==========================================
+        // ÖĞRENCİ PROJELERİ MOCK DATASI
+        // ==========================================
+        const projects = [
+            { id: 1, student: "Ali Yılmaz", year: { tr: "4. Sınıf", en: "Year 4" }, title: { tr: "Kentsel Mobilite", en: "Urban Mobility" }, tools: ["Midjourney", "ChatGPT"], image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=1200&q=80", pdf: "#" },
+            { id: 2, student: "Ayşe Demir", year: { tr: "3. Sınıf", en: "Year 3" }, title: { tr: "Biyofilik Obje", en: "Biophilic Object" }, tools: ["Midjourney", "Vizcom"], image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80", pdf: "#" },
+            { id: 3, student: "Can Kaya", year: { tr: "2. Sınıf", en: "Year 2" }, title: { tr: "Akıllı Modül", en: "Smart Module" }, tools: ["DALL-E 3", "Rhino AI"], image: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?w=1200&q=80", pdf: "#" },
+            { id: 4, student: "Zeynep Çelik", year: { tr: "4. Sınıf", en: "Year 4" }, title: { tr: "Eko-Ambalaj", en: "Eco-Packaging" }, tools: ["Midjourney"], image: "https://images.unsplash.com/photo-1621244249240-0870950362b1?w=1200&q=80", pdf: "#" },
+            { id: 5, student: "Burak Şahin", year: { tr: "1. Sınıf", en: "Year 1" }, title: { tr: "Form Analizi", en: "Form Analysis" }, tools: ["Stable Diffusion", "ChatGPT"], image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80", pdf: "#" },
+            { id: 6, student: "Elif Yıldız", year: { tr: "3. Sınıf", en: "Year 3" }, title: { tr: "Sağlık Asistanı", en: "Health Assistant" }, tools: ["Midjourney", "Krea AI"], image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=80", pdf: "#" }
+        ];
+
+        // ==========================================
+        // DİL VE RENDER MANTIĞI
+        // ==========================================
+        let currentLang = localStorage.getItem('idex_lang') || 'tr';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('idex_lang', lang);
+            document.documentElement.lang = lang;
+
+            // Statik metinleri değiştir
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            // UI buton renklerini güncelle
+            document.getElementById('lang-tr').className = lang === 'tr' ? 'text-white hover:text-white transition-colors' : 'text-gray-500 hover:text-white transition-colors';
+            document.getElementById('lang-en').className = lang === 'en' ? 'text-white hover:text-white transition-colors' : 'text-gray-500 hover:text-white transition-colors';
+
+            // Dinamik içerikleri yeniden render et
+            renderFilters();
+            renderInstructors();
+            renderProjects();
+        }
+
+        function renderFilters() {
+            const container = document.getElementById('filters-container');
+            const t = translations[currentLang];
+            container.innerHTML = `
+                <button class="text-white hover:text-ai-accent transition-colors text-right">${t.filter_all}</button>
+                <button class="text-gray-600 hover:text-white transition-colors text-right">${t.filter_y1}</button>
+                <button class="text-gray-600 hover:text-white transition-colors text-right">${t.filter_y2}</button>
+                <button class="text-gray-600 hover:text-white transition-colors text-right">${t.filter_y3}</button>
+                <button class="text-gray-600 hover:text-white transition-colors text-right">${t.filter_y4}</button>
+            `;
+        }
+
+        function renderInstructors() {
+            const grid = document.getElementById('instructors-grid');
+            let html = '';
+
+            instructors.forEach((inst) => {
+                const avatarUrl = `https://api.dicebear.com/7.x/shapes/svg?seed=${inst.name}&backgroundColor=030303,1a1a1a&shape1Color=ffffff&shape2Color=444444`;
+                const roleName = inst.role[currentLang];
+
+                html += `
+                <div class="group flex flex-col gap-4">
+                    <div class="museum-img-wrapper aspect-[3/4] bg-[#0a0a0c] overflow-hidden relative border border-white/5">
+                        <img src="${avatarUrl}" alt="${inst.name}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100">
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-white tracking-wide uppercase mb-1">${inst.name}</h3>
+                        <p class="text-[10px] text-gray-500 tracking-widest uppercase">${roleName}</p>
+                    </div>
+                </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            const t = translations[currentLang];
+            let html = '';
+
+            projects.forEach(proj => {
+                const yearName = proj.year[currentLang];
+                const titleName = proj.title[currentLang];
+
+                html += `
+                <div class="artwork-card group cursor-pointer flex flex-col gap-6" onclick="openModal(${proj.id})">
+                    <div class="museum-img-wrapper relative aspect-[4/5] md:aspect-[3/4] bg-[#050505] overflow-hidden">
+                        <img src="${proj.image}" alt="${titleName}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100">
+                        
+                        <div class="artwork-overlay absolute inset-0 flex flex-col justify-end p-6">
+                            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 opacity-0 group-hover:opacity-100">
+                                <span class="inline-block border border-white/30 text-white text-[9px] uppercase tracking-[0.2em] px-3 py-1 mb-3 backdrop-blur-sm">${t.card_examine}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1 border-l border-white/20 pl-4">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">${yearName}</span>
+                        <h3 class="text-lg font-bold text-white uppercase tracking-wide group-hover:text-ai-accent transition-colors">${titleName}</h3>
+                        <p class="text-xs text-gray-400 font-light mt-1">${proj.student}</p>
+                    </div>
+                </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        // --- MODAL FONKSİYONLARI ---
+        const modal = document.getElementById('project-modal');
+
+        function openModal(projectId) {
+            const proj = projects.find(p => p.id === projectId);
+            if (!proj) return;
+
+            document.getElementById('modal-title').innerText = proj.title[currentLang];
+            document.getElementById('modal-student').innerText = proj.student;
+            document.getElementById('modal-year').innerText = proj.year[currentLang];
+            document.getElementById('modal-image').src = proj.image;
+            document.getElementById('modal-pdf-btn').href = proj.pdf;
+
+            // Araçlar (Tools) Render
+            const toolsContainer = document.getElementById('modal-tools-container');
+            toolsContainer.innerHTML = proj.tools.map(tool => `<span class="border border-white/10 px-2 py-1">${tool}</span>`).join('');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => { modal.firstElementChild.classList.add('opacity-100'); }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") { closeModal(); }
+        });
+
+        // Sayfa yüklendiğinde dili ayarla ve render et
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLang);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDExAI.26 | Özyeğin Üniversitesi Endüstriyel Tasarım</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN for quick deployment) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Custom Tailwind Configuration for "Dark AI" Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        ai: {
+                            dark: '#0a0a0c',
+                            card: '#141418',
+                            border: '#2a2a35',
+                            accent: '#00f0ff', // Cyan / Neon AI feel
+                            purple: '#b026ff'
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'ai-gradient': 'linear-gradient(to right, #00f0ff, #b026ff)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* * ÖNEMLİ: İSTEDİĞİNİZ ARKA PLAN GÖRSELİ İÇİN RESPONSIVE KOD BURADA
+         * "background-image: url('...')" kısmına kendi dark background 
+         * görselinizin yolunu (örneğin: './assets/dark-bg.jpg') yazmalısınız.
+         */
+        .custom-dark-bg {
+            background-color: #0a0a0c;
+            background-image: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2874&auto=format&fit=crop');
+            /* Burayı kendi görselinizle değiştirin */
+            background-size: cover;
+            /* Görselin ekranı kaplamasını sağlar */
+            background-position: center;
+            /* Görseli ortalar */
+            background-attachment: fixed;
+            /* Scroll yaparken görselin sabit kalmasını sağlar (Parallax etkisi) */
+            background-repeat: no-repeat;
+        }
+
+        /* Cam efekti (Glassmorphism) */
+        .glass {
+            background: rgba(20, 20, 24, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Özel Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a35;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+
+        /* Text Gradient Kısayolu */
+        .text-gradient {
+            background: linear-gradient(to right, #00f0ff, #b026ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Yürütücü Kartı Hover Efekti */
+        .instructor-card .bio-overlay {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .instructor-card:hover .bio-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .instructor-card:hover img {
+            transform: scale(1.05);
+            filter: grayscale(0%);
+        }
+
+        .instructor-card img {
+            transition: all 0.5s ease;
+            filter: grayscale(100%);
+            /* AI temasına uygun karanlık/gri başlangıç */
+        }
+    </style>
+</head>
+
+<body class="bg-ai-dark text-gray-300 font-sans antialiased selection:bg-ai-accent selection:text-black">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-ai-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logos (White PNGs placeholder) -->
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity">
+                        <!-- Üniversite Logosu Placeholder -->
+                        <div
+                            class="h-8 w-24 bg-white/10 rounded border border-white/20 flex items-center justify-center text-[10px] text-white">
+                            OzU Logo</div>
+                        <!-- Bölüm Logosu Placeholder -->
+                        <div
+                            class="h-8 w-24 bg-white/10 rounded border border-white/20 flex items-center justify-center text-[10px] text-white">
+                            ENT Logo</div>
+                        <!-- Proje Logosu Placeholder -->
+                        <div
+                            class="h-8 w-24 bg-white/10 rounded border border-white/20 flex items-center justify-center text-[10px] text-white font-bold">
+                            IDExAI.26</div>
+                    </div>
+                </div>
+                <!-- Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#tanitim"
+                            class="hover:text-ai-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">Tanıtım</a>
+                        <a href="#yurutuculer"
+                            class="hover:text-ai-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">Yürütücüler</a>
+                        <a href="#sergi"
+                            class="bg-white/5 border border-ai-border hover:border-ai-accent hover:text-ai-accent px-4 py-2 rounded-full text-sm font-medium transition-all">Sanal
+                            Sergi</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (İstediğiniz custom dark bg burada uygulanıyor) -->
+    <section class="custom-dark-bg relative min-h-screen flex items-center justify-center pt-20">
+        <!-- Karanlık overlay - yazının okunabilirliği için -->
+        <div class="absolute inset-0 bg-black/70 bg-gradient-to-b from-transparent to-ai-dark"></div>
+
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ai-accent/10 border border-ai-accent/30 text-ai-accent text-xs font-semibold uppercase tracking-wider mb-6">
+                <i class="ph ph-sparkle text-lg"></i>
+                Bahar Dönemi 2026 Pilot Programı
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+                Tasarımın Geleceğini <br>
+                <span class="text-gradient">Yapay Zeka</span> ile Şekillendirin.
+            </h1>
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto font-light">
+                Özyeğin Üniversitesi Endüstriyel Tasarım Bölümü, 1. sınıftan 4. sınıfa kadar tüm stüdyoları kapsayan,
+                yapay zekayı tasarım düşüncesinin aktif bir bileşeni haline getiren yeni nesil eğitim modelini sunar.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#tanitim"
+                    class="px-8 py-4 rounded-full bg-white text-black font-semibold hover:bg-gray-200 transition-colors">
+                    Projeyi Keşfet
+                </a>
+                <a href="#sergi"
+                    class="px-8 py-4 rounded-full border border-ai-border glass text-white hover:border-ai-accent hover:text-ai-accent transition-all flex items-center gap-2">
+                    Sergiyi Gez <i class="ph ph-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tanıtım Section -->
+    <section id="tanitim" class="py-24 bg-ai-dark relative">
+        <!-- Arka plan dekoratif element -->
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-ai-border to-transparent">
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">IDExAI.26 Nedir?</h2>
+                    <div class="space-y-6 text-gray-400 font-light leading-relaxed">
+                        <p>
+                            <strong class="text-white font-medium">Özyeğin Üniversitesi Endüstriyel Tasarım
+                                Bölümü</strong> olarak, 2026 Bahar döneminde 1. sınıftan 4. sınıfa kadar tüm tasarım
+                            stüdyolarını kapsayan dönüştürücü bir pilot program başlatmanın heyecanını yaşıyoruz.
+                        </p>
+                        <p>
+                            <strong class="text-white font-medium">IDExAI.26</strong>, üretken yapay zekânın tasarım
+                            sürecinin araştırma, fikir geliştirme, konsept oluşturma, prototipleme, test ve iletişim
+                            aşamalarına etkili ve sorumlu şekilde entegre edilmesini hedefleyen yeni bir eğitim
+                            modelidir.
+                        </p>
+                        <p>
+                            Program, Beko eski Endüstriyel Tasarım İcra Direktörü Serdal Korkut Avcı’nın
+                            danışmanlığında; bölümümüzün öğretim üyeleri, stüdyo yürütücüleri ve araştırma ekibinin
+                            katkılarıyla yürütülmektedir.
+                        </p>
+                        <p>
+                            9 Şubat’taki başlangıç buluşmasının ardından, gerçekleştirilen hızlandırıcı ders (Crash
+                            Course) modülleri tamamlanmış; süreç, tüm sınıf seviyelerinin aynı tema üzerinde yapay zekâ
+                            destekli tasarım süreçleri geliştirdiği ortak stüdyo projesi ile devam etmektedir.
+                        </p>
+                        <div class="p-6 mt-8 rounded-2xl glass border border-ai-border border-l-4 border-l-ai-purple">
+                            <p class="text-gray-300 italic">
+                                "Bu pilot program, yapay zekâyı yalnızca bir araç olarak değil, tasarım düşüncesinin
+                                aktif bir bileşeni olarak konumlandıran yeni bir tasarım eğitimi yaklaşımının ilk
+                                adımını temsil etmektedir."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="aspect-square rounded-3xl overflow-hidden border border-ai-border relative group">
+                        <!-- Temsili görsel -->
+                        <img src="https://images.unsplash.com/photo-1675557009875-436f5b9d799b?q=80&w=2000&auto=format&fit=crop"
+                            alt="AI Design Process"
+                            class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-700 mix-blend-luminosity">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-ai-purple/20 to-transparent"></div>
+
+                        <!-- Veri kutuları süslemesi -->
+                        <div class="absolute bottom-6 left-6 right-6 flex justify-between">
+                            <div class="glass px-4 py-2 rounded-lg border border-white/10">
+                                <span class="block text-xs text-gray-400">Crash Course</span>
+                                <span class="text-white font-bold text-lg">Tamamlandı</span>
+                            </div>
+                            <div class="glass px-4 py-2 rounded-lg border border-white/10 text-right">
+                                <span class="block text-xs text-gray-400">Katılımcı Öğrenci</span>
+                                <span class="text-white font-bold text-lg">100+</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Arka plan glow efekti -->
+                    <div class="absolute -inset-4 bg-ai-gradient opacity-20 blur-3xl -z-10 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Yürütücüler Section -->
+    <section id="yurutuculer" class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-zinc-900/50"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Akademik Kadro ve Yürütücüler</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">IDExAI.26 programına yön veren, yapay zeka ve tasarımın
+                    kesişiminde öğrencilere rehberlik eden uzman kadromuz.</p>
+            </div>
+
+            <!-- CSS Grid for Instructors -->
+            <div id="instructors-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- JavaScript ile doldurulacak -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sergi Section (Öğrenci Projeleri) -->
+    <section id="sergi" class="py-24 bg-ai-dark relative min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div>
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ai-purple/10 border border-ai-purple/30 text-ai-purple text-xs font-semibold uppercase mb-4">
+                        <i class="ph ph-aperture"></i> Faz 2: Yayında
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">Sanal Sergi Alanı</h2>
+                    <p class="text-gray-400">100'e yakın öğrencinin yapay zeka destekli tasarım süreçleri ve sonuç
+                        ürünleri.</p>
+                </div>
+
+                <!-- Filtreleme (Göstermelik) -->
+                <div class="flex gap-2 overflow-x-auto pb-2">
+                    <button
+                        class="px-4 py-2 rounded-full bg-white text-black text-sm font-medium whitespace-nowrap">Tümü</button>
+                    <button
+                        class="px-4 py-2 rounded-full glass border border-ai-border text-gray-300 hover:text-white text-sm font-medium whitespace-nowrap">1.
+                        Sınıf</button>
+                    <button
+                        class="px-4 py-2 rounded-full glass border border-ai-border text-gray-300 hover:text-white text-sm font-medium whitespace-nowrap">2.
+                        Sınıf</button>
+                    <button
+                        class="px-4 py-2 rounded-full glass border border-ai-border text-gray-300 hover:text-white text-sm font-medium whitespace-nowrap">3.
+                        Sınıf</button>
+                    <button
+                        class="px-4 py-2 rounded-full glass border border-ai-border text-gray-300 hover:text-white text-sm font-medium whitespace-nowrap">4.
+                        Sınıf</button>
+                </div>
+            </div>
+
+            <!-- Projeler Grid -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- JavaScript ile doldurulacak -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Gelecek Fazlar / Genişletilebilirlik Alanı -->
+    <section id="gelecek-fazlar" class="py-20 border-t border-ai-border relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-xl font-bold text-white mb-8 flex items-center gap-2">
+                <i class="ph ph-infinity text-ai-accent"></i> Program Çıktıları (Yakında)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Placeholder: Video -->
+                <div
+                    class="glass border border-ai-border p-6 rounded-2xl flex flex-col items-center justify-center text-center opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
+                    <i class="ph ph-play-circle text-4xl text-gray-500 mb-4"></i>
+                    <h4 class="text-white font-medium mb-1">Proje Belgeseli</h4>
+                    <p class="text-sm text-gray-400">Tüm sürecin özet videosu çok yakında eklenecektir.</p>
+                </div>
+                <!-- Placeholder: Yayınlar -->
+                <div
+                    class="glass border border-ai-border p-6 rounded-2xl flex flex-col items-center justify-center text-center opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
+                    <i class="ph ph-books text-4xl text-gray-500 mb-4"></i>
+                    <h4 class="text-white font-medium mb-1">Akademik Yayınlar</h4>
+                    <p class="text-sm text-gray-400">Pilot programdan elde edilen çıktılar ve makaleler.</p>
+                </div>
+                <!-- Placeholder: Dökümanlar -->
+                <div
+                    class="glass border border-ai-border p-6 rounded-2xl flex flex-col items-center justify-center text-center opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
+                    <i class="ph ph-file-pdf text-4xl text-gray-500 mb-4"></i>
+                    <h4 class="text-white font-medium mb-1">Kılavuzlar</h4>
+                    <p class="text-sm text-gray-400">AI destekli tasarım süreçleri için faydalı kaynaklar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="text-white font-bold text-xl">IDExAI.26</div>
+                    <div class="h-4 w-px bg-gray-700"></div>
+                    <div class="text-gray-400 text-sm">Özyeğin Üniversitesi Endüstriyel Tasarım Bölümü</div>
+                </div>
+                <div class="flex gap-4 text-gray-400 text-sm">
+                    <span>#IDExAI26</span>
+                    <span>#AIxDesign</span>
+                    <span>#OzU</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL (Proje Detayı İçin) -->
+    <div id="project-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+
+        <!-- Modal Content -->
+        <div
+            class="relative w-full max-w-6xl max-h-[90vh] mx-4 flex flex-col glass border border-ai-border rounded-2xl overflow-hidden shadow-2xl">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 border-b border-ai-border bg-black/50">
+                <div class="flex flex-col">
+                    <h3 id="modal-title" class="text-white font-bold text-lg">Proje Adı</h3>
+                    <span id="modal-student" class="text-gray-400 text-sm">Öğrenci Adı - Sınıf</span>
+                </div>
+                <button onclick="closeModal()"
+                    class="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
+                <!-- Sol: Pafta Önizleme (Büyük Görsel) -->
+                <div class="flex-1 rounded-xl overflow-hidden bg-zinc-900 border border-white/5 relative group">
+                    <div
+                        class="absolute top-4 left-4 bg-black/60 backdrop-blur px-3 py-1 rounded-full text-xs text-white z-10">
+                        Sunum Paftası</div>
+                    <img id="modal-image" src="" alt="Sunum Paftası"
+                        class="w-full h-auto object-contain bg-zinc-950 min-h-[400px]">
+                </div>
+
+                <!-- Sağ: Logbook ve Detaylar -->
+                <div class="w-full lg:w-80 flex flex-col gap-4">
+                    <div class="glass border border-ai-border p-5 rounded-xl">
+                        <h4 class="text-white font-medium mb-2">Design Logbook</h4>
+                        <p class="text-sm text-gray-400 mb-4">Öğrencinin yapay zeka araçlarını tasarım sürecine nasıl
+                            entegre ettiğini anlatan detaylı günlüğü inceleyin.</p>
+
+                        <a href="#" id="modal-pdf-btn"
+                            class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors">
+                            <i class="ph ph-file-pdf text-xl"></i> Logbook Görüntüle (PDF)
+                        </a>
+                    </div>
+
+                    <div class="glass border border-ai-border p-5 rounded-xl flex-1">
+                        <h4 class="text-white font-medium mb-3">Kullanılan Araçlar</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-gray-300">Midjourney</span>
+                            <span
+                                class="px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-gray-300">ChatGPT</span>
+                            <span
+                                class="px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-gray-300">Rhino
+                                3D</span>
+                        </div>
+
+                        <h4 class="text-white font-medium mt-6 mb-2">Proje Özeti</h4>
+                        <p class="text-sm text-gray-400 line-clamp-4">Bu projede, belirlenen tema çerçevesinde form
+                            arayışı Midjourney üzerinden yapılmış, konsept kurgusu dil modelleri ile desteklenerek nihai
+                            prototipe dönüştürülmüştür...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data & Interaction Logic -->
+    <script>
+        // --- 1. YÜRÜTÜCÜLER DATASI ---
+        const instructors = [
+            { name: "Prof. Dr. Alpay Er", role: "Endüstriyel Tasarım Bölüm Başkanı", type: "head" },
+            { name: "Serdal Korkut Avcı", role: "Proje Danışmanı, Yarı Zamanlı Öğr. Gör.", type: "advisor" },
+            { name: "Arş. Gör. Ulaş Tigin", role: "Proje Araştırma Asistanı", type: "research" },
+            { name: "Prof. Dr. Şebnem Timur", role: "Stüdyo Ders Yürütücüsü", type: "studio" },
+            { name: "Dr. Öğr. Üyesi Zeynep Karapars", role: "Stüdyo Ders Yürütücüsü", type: "studio" },
+            { name: "Öğr. Gör. Dr. Emrah Özturan", role: "Stüdyo Ders Yürütücüsü", type: "studio" },
+            { name: "Öğr. Gör. Ali Gökkurt", role: "Stüdyo Ders Yürütücüsü", type: "studio" },
+            { name: "Öğr. Gör. Tuğba Tok", role: "Stüdyo Ders Yürütücüsü", type: "studio" },
+            { name: "Arş. Gör. Pelin Günay", role: "Proje Ders Yürütücüsü", type: "studio" },
+            { name: "Aysu Dericioğlu Egemen", role: "Yarı Zamanlı Öğretim Görevlisi", type: "parttime" },
+            { name: "Gamze Güven", role: "Yarı Zamanlı Öğretim Görevlisi", type: "parttime" },
+            { name: "Seyman Çay", role: "Yarı Zamanlı Öğretim Görevlisi", type: "parttime" },
+            { name: "Sonay Ardi Akkar", role: "Yarı Zamanlı Öğretim Görevlisi", type: "parttime" },
+            { name: "Eda Sarman", role: "Öğretim Asistanı", type: "assistant" },
+            { name: "Elif Doğrul", role: "Öğretim Asistanı", type: "assistant" },
+            { name: "Halil Doğan", role: "Öğretim Asistanı", type: "assistant" }
+        ];
+
+        // --- 2. ÖĞRENCİ PROJELERİ MOCK DATASI (Sergi İçin) ---
+        // Toplam 100 civarı eklenecek, şimdilik gösterim amaçlı 6 adet.
+        const projects = [
+            { id: 1, student: "Ali Yılmaz", year: "4. Sınıf", title: "Geleceğin Mobilite Çözümü", image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&q=80", pdf: "#" },
+            { id: 2, student: "Ayşe Demir", year: "3. Sınıf", title: "Biyofilik Ev Aletleri", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80", pdf: "#" },
+            { id: 3, student: "Can Kaya", year: "2. Sınıf", title: "Akıllı Çalışma Ünitesi", image: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?w=800&q=80", pdf: "#" },
+            { id: 4, student: "Zeynep Çelik", year: "4. Sınıf", title: "Sürdürülebilir Ambalaj", image: "https://images.unsplash.com/photo-1621244249240-0870950362b1?w=800&q=80", pdf: "#" },
+            { id: 5, student: "Burak Şahin", year: "1. Sınıf", title: "Temel Form Araştırması", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80", pdf: "#" },
+            { id: 6, student: "Elif Yıldız", year: "3. Sınıf", title: "Giyilebilir Sağlık Asistanı", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80", pdf: "#" },
+        ];
+
+        // --- RENDER FUNCTIONS ---
+
+        // Yürütücüleri Render Et
+        function renderInstructors() {
+            const grid = document.getElementById('instructors-grid');
+            let html = '';
+
+            instructors.forEach((inst, index) => {
+                // Rastgele soyut avatarlar (Gerçek fotolarla değiştirilecek)
+                const avatarUrl = `https://api.dicebear.com/7.x/shapes/svg?seed=${inst.name}&backgroundColor=141418,0a0a0c`;
+
+                // Kısa bio oluşturma (Mock)
+                const shortBio = `${inst.name}, yapay zeka entegreli tasarım süreçleri pilot programında öğrencilere mentorluk yapmaktadır.`;
+
+                html += `
+                <div class="instructor-card relative bg-ai-card rounded-2xl overflow-hidden border border-ai-border group cursor-default">
+                    <div class="aspect-[4/5] relative bg-zinc-900">
+                        <img src="${avatarUrl}" alt="${inst.name}" class="w-full h-full object-cover">
+                        <!-- Karanlık Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                        
+                        <!-- Hover Bio Overlay -->
+                        <div class="bio-overlay absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col justify-center p-6 text-center">
+                            <i class="ph ph-quotes text-3xl text-ai-accent mb-3 opacity-50"></i>
+                            <p class="text-sm text-gray-300 font-light leading-relaxed">${shortBio}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-5 z-10 bg-gradient-to-t from-black to-transparent">
+                        <h3 class="text-lg font-bold text-white leading-tight mb-1">${inst.name}</h3>
+                        <p class="text-xs text-ai-accent font-medium">${inst.role}</p>
+                    </div>
+                </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        // Projeleri Render Et
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            let html = '';
+
+            projects.forEach(proj => {
+                html += `
+                <div class="group relative bg-ai-card rounded-2xl border border-ai-border overflow-hidden hover:border-ai-accent/50 transition-colors cursor-pointer" onclick="openModal(${proj.id})">
+                    <!-- Görsel Alanı (Pafta Önizleme) -->
+                    <div class="aspect-[16/10] bg-zinc-900 relative overflow-hidden">
+                        <img src="${proj.image}" alt="${proj.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-ai-card to-transparent"></div>
+                        
+                        <!-- Etiket -->
+                        <div class="absolute top-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded-full text-xs text-white border border-white/10">
+                            ${proj.year}
+                        </div>
+                        
+                        <!-- Hover Play/Görüntüle İkonu -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="w-12 h-12 rounded-full bg-ai-accent text-black flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+                                <i class="ph ph-eye text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bilgi Alanı -->
+                    <div class="p-6 relative">
+                        <h3 class="text-xl font-bold text-white mb-1 group-hover:text-ai-accent transition-colors">${proj.title}</h3>
+                        <p class="text-gray-400 text-sm flex items-center gap-2">
+                            <i class="ph ph-user"></i> ${proj.student}
+                        </p>
+                    </div>
+                </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        // --- MODAL FONKSİYONLARI ---
+        const modal = document.getElementById('project-modal');
+
+        function openModal(projectId) {
+            // İlgili projeyi bul
+            const proj = projects.find(p => p.id === projectId);
+            if (!proj) return;
+
+            // İçeriği Doldur
+            document.getElementById('modal-title').innerText = proj.title;
+            document.getElementById('modal-student').innerText = `${proj.student} - ${proj.year}`;
+            document.getElementById('modal-image').src = proj.image;
+            document.getElementById('modal-pdf-btn').href = proj.pdf;
+
+            // Göster
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; // Arka plan scrollunu kapat
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto'; // Scrollu geri aç
+        }
+
+        // ESC tuşu ile modal kapatma
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+
+        // Sayfa yüklendiğinde render et
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInstructors();
+            renderProjects();
+        });
+    </script>
+</body>
+
+</html>

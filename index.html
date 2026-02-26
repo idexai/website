@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDExAI.26</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <div class="noise-overlay"></div>
+
+    <div class="guide-lines" aria-hidden="true">
+        <div class="guide-line" style="left:20%"></div>
+        <div class="guide-line" style="left:50%"></div>
+        <div class="guide-line" style="left:80%"></div>
+    </div>
+
+    <nav class="site-nav">
+        <div class="container nav-inner">
+            <div class="nav-logos">
+                <img src="assets/logos/ozyegin-university.svg" alt="Özyeğin University Logo" class="logo-uni">
+            </div>
+
+            <div class="nav-brand">
+                <img src="assets/logos/idexai26.svg" alt="IDExAI.26 Logo" class="logo-idexai">
+            </div>
+
+            <div class="lang-switch mobile-only">
+                <button onclick="setLanguage('tr')" id="lang-tr-mobile" class="lang-btn active">TR</button>
+                <span>|</span>
+                <button onclick="setLanguage('en')" id="lang-en-mobile" class="lang-btn">EN</button>
+            </div>
+
+            <div class="nav-links desktop-only">
+                <a href="#tanitim" data-i18n="nav_manifesto"></a>
+                <a href="#yurutuculer" data-i18n="nav_curators"></a>
+
+                <!-- <template id="gizli-nav-sergi"> -->
+                <a href="#sergi" class="nav-link-emphasis"><span data-i18n="nav_exhibition"></span></a>
+                <!--  </template> -->
+
+                <div class="lang-switch lang-switch-desktop">
+                    <button onclick="setLanguage('tr')" id="lang-tr" class="lang-btn active">TR</button>
+                    <span>|</span>
+                    <button onclick="setLanguage('en')" id="lang-en" class="lang-btn">EN</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero custom-dark-bg">
+        <div class="container hero-grid">
+            <div class="hero-main">
+                <p class="hero-badge"><span class="badge-line"></span><span data-i18n="hero_badge"></span></p>
+                <h1 data-i18n="hero_title" class="hero-title"></h1>
+            </div>
+            <div class="hero-side">
+                <p data-i18n="hero_desc" class="hero-desc"></p>
+
+                <!--  <template id="gizli-hero-btn"> -->
+                <a href="#sergi" class="hero-link">
+                    <span data-i18n="hero_btn"></span>
+                    <span class="hero-link-icon"><i class="ph ph-arrow-down-right"></i></span>
+                </a>
+                <!--    </template>-->
+            </div>
+        </div>
+    </section>
+
+    <section id="tanitim" class="section">
+        <div class="container section-grid">
+            <div class="section-index">
+                <span class="section-no">01</span>
+                <h2 data-i18n="section_manifesto" class="section-label"></h2>
+            </div>
+
+            <div class="section-content">
+                <h3 data-i18n="manifesto_h3" class="manifesto-title"></h3>
+
+                <div class="manifesto-columns">
+                    <div>
+                        <p data-i18n="manifesto_p1" class="mb-6"></p>
+                        <p data-i18n="manifesto_p2"></p>
+                    </div>
+
+                    <div>
+                        <div class="manifesto-quote-wrap">
+                            <p data-i18n="manifesto_quote" class="manifesto-quote"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <img src="assets/image-01.jpeg" alt="Manifesto visual" class="manifesto-index-image">
+                <div class="seed-card">
+                    <p data-i18n="seed_program_title" class="seed-title"></p>
+                    <p data-i18n="seed_program_desc" class="seed-desc"></p>
+                </div>
+            </div>
+    </section>
+
+    <section id="yurutuculer" class="section section-alt">
+        <div class="container">
+            <div class="section-grid section-grid-header">
+                <div class="section-index">
+                    <span class="section-no">02</span>
+                    <h2 data-i18n="section_team" class="section-label"></h2>
+                </div>
+                <div class="section-content title-row">
+                    <h3 data-i18n="team_h3" class="team-title"></h3>
+                </div>
+            </div>
+
+            <div id="instructors-grid" class="instructors-grid"></div>
+        </div>
+    </section>
+
+    <!-- <template id="gizli-sergi-alani">-->
+    <section id="sergi" class="section min-h-screen">
+        <div class="container">
+            <div class="section-grid exhibition-header">
+                <div class="section-index">
+                    <span class="section-no">03</span>
+                    <h2 data-i18n="section_collection" class="section-label"></h2>
+                </div>
+                <div class="section-content collection-content">
+                    <h3 data-i18n="collection_h3" class="collection-title"></h3>
+                    <p data-i18n="collection_desc" class="collection-desc"></p>
+                </div>
+                <div class="filters-wrap">
+                    <div id="filters-container" class="filters"></div>
+                </div>
+            </div>
+            <div id="projects-grid" class="projects-grid"></div>
+        </div>
+    </section>
+    <!--   </template>-->
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logos">
+                        <img src="assets/logos/ozyegin-university.svg" alt="Özyeğin University Logo"
+                            class="footer-logo-uni">
+                        <img src="assets/logos/idexai26.svg" alt="IDExAI.26 Logo" class="footer-logo-idexai">
+                    </div>
+                    <div data-i18n="footer_dept" class="footer-dept"></div>
+                </div>
+                <div class="footer-tags">
+                    <span>#IDExAI26</span>
+                    <span>#AIxDesign</span>
+                    <span>#OzU</span>
+                    <div class="footer-social">
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                            aria-label="Instagram">
+                            <i class="ph ph-instagram-logo"></i>
+                        </a>
+                        <a href="https://www.ozyegin.edu.tr/" target="_blank" rel="noopener noreferrer"
+                            aria-label="Website">
+                            <i class="ph ph-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-line"></div>
+            <div data-i18n="footer_rights" class="footer-rights"></div>
+        </div>
+    </footer>
+
+    <div id="project-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeModal()"></div>
+
+        <div class="modal-content">
+            <button onclick="closeModal()" class="modal-close"><i class="ph ph-x"></i></button>
+
+            <div class="modal-image-wrap">
+                <img id="modal-image" src="" alt="Sunum Paftası" class="modal-image">
+            </div>
+
+            <div class="modal-side">
+                <div>
+                    <span id="modal-year" class="modal-year"></span>
+                    <h3 id="modal-title" class="modal-title"></h3>
+                    <p class="modal-designer"><span data-i18n="modal_designer"></span>: <span id="modal-student"
+                            class="text-white"></span></p>
+                </div>
+
+                <div class="modal-divider"></div>
+
+                <div>
+                    <h4 data-i18n="modal_process_h4" class="modal-subtitle"></h4>
+                    <p data-i18n="modal_process_p" class="modal-text"></p>
+
+                    <a href="#" id="modal-pdf-btn" target="_blank" class="modal-btn">
+                        <span data-i18n="modal_logbook_btn"></span> <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div>
+                    <h4 data-i18n="modal_tools_h4" class="modal-subtitle"></h4>
+                    <div id="modal-tools-container" class="modal-tools"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./data.js"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
