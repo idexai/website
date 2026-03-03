@@ -103,7 +103,56 @@
                     <p data-i18n="seed_program_title" class="seed-title"></p>
                     <p data-i18n="seed_program_desc" class="seed-desc"></p>
                 </div>
+
+                <section class="dt-framework" aria-labelledby="dt-framework-title">
+                    <h4 id="dt-framework-title" data-i18n="framework_title" class="dt-framework-title"></h4>
+                    <p data-i18n="framework_copy" class="dt-framework-copy"></p>
+
+                    <ol class="dt-timeline" aria-label="Design Thinking Timeline">
+                        <li class="dt-step">
+                            <button type="button" class="dt-step-btn" data-step="empathize"
+                                data-i18n-aria="dt_step_empathize_aria">
+                                <span class="dt-dot" aria-hidden="true"></span>
+                                <span class="dt-step-label" data-i18n="dt_step_empathize"></span>
+                                <span class="dt-step-sub" data-i18n="dt_sub_empathize"></span>
+                            </button>
+                        </li>
+                        <li class="dt-step">
+                            <button type="button" class="dt-step-btn" data-step="define"
+                                data-i18n-aria="dt_step_define_aria">
+                                <span class="dt-dot" aria-hidden="true"></span>
+                                <span class="dt-step-label" data-i18n="dt_step_define"></span>
+                                <span class="dt-step-sub" data-i18n="dt_sub_define"></span>
+                            </button>
+                        </li>
+                        <li class="dt-step is-active">
+                            <button type="button" class="dt-step-btn" data-step="ideate"
+                                data-i18n-aria="dt_step_ideate_aria" aria-current="step">
+                                <span class="dt-dot" aria-hidden="true"></span>
+                                <span class="dt-step-label" data-i18n="dt_step_ideate"></span>
+                                <span class="dt-step-sub" data-i18n="dt_sub_ideate"></span>
+                            </button>
+                        </li>
+                        <li class="dt-step">
+                            <button type="button" class="dt-step-btn" data-step="prototype"
+                                data-i18n-aria="dt_step_prototype_aria">
+                                <span class="dt-dot" aria-hidden="true"></span>
+                                <span class="dt-step-label" data-i18n="dt_step_prototype"></span>
+                                <span class="dt-step-sub" data-i18n="dt_sub_prototype"></span>
+                            </button>
+                        </li>
+                        <li class="dt-step">
+                            <button type="button" class="dt-step-btn" data-step="test"
+                                data-i18n-aria="dt_step_test_aria">
+                                <span class="dt-dot" aria-hidden="true"></span>
+                                <span class="dt-step-label" data-i18n="dt_step_test"></span>
+                                <span class="dt-step-sub" data-i18n="dt_sub_test"></span>
+                            </button>
+                        </li>
+                    </ol>
+                </section>
             </div>
+        </div>
     </section>
 
     <section id="yurutuculer" class="section section-alt">
@@ -134,11 +183,31 @@
                     <h3 data-i18n="collection_h3" class="collection-title"></h3>
                     <p data-i18n="collection_desc" class="collection-desc"></p>
                 </div>
-                <div class="filters-wrap">
-                    <div id="filters-container" class="filters"></div>
+                <div class="exhibition-links">
+                    <a href="#sergi-eggdrop" class="exhibition-link-btn" data-i18n="collection_btn_eggdrop"></a>
+                    <a href="#sergi-hotbeverage" class="exhibition-link-btn" data-i18n="collection_btn_hotbeverage"></a>
                 </div>
             </div>
-            <div id="projects-grid" class="projects-grid"></div>
+
+            <div id="sergi-eggdrop" class="exhibition-block">
+                <div class="exhibition-block-head">
+                    <div>
+                        <h4 data-i18n="eggdrop_title" class="exhibition-block-title"></h4>
+                        <p data-i18n="eggdrop_desc" class="exhibition-block-desc"></p>
+                    </div>
+                </div>
+                <div id="projects-grid-eggdrop" class="projects-grid"></div>
+            </div>
+
+            <div id="sergi-hotbeverage" class="exhibition-block">
+                <div class="exhibition-block-head">
+                    <div>
+                        <h4 data-i18n="hotbeverage_title" class="exhibition-block-title"></h4>
+                        <p data-i18n="hotbeverage_desc" class="exhibition-block-desc"></p>
+                    </div>
+                </div>
+                <div id="projects-grid-hotbeverage" class="projects-grid"></div>
+            </div>
         </div>
     </section>
     <!--   </template>-->
@@ -159,12 +228,12 @@
                     <span>#AIxDesign</span>
                     <span>#OzU</span>
                     <div class="footer-social">
-                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                        <a href="https://www.instagram.com/ozuide/" target="_blank" rel="noopener noreferrer"
                             aria-label="Instagram">
                             <i class="ph ph-instagram-logo"></i>
                         </a>
-                        <a href="https://www.ozyegin.edu.tr/" target="_blank" rel="noopener noreferrer"
-                            aria-label="Website">
+                        <a href="https://www.ozyegin.edu.tr/tr/endustriyel-tasarim" target="_blank"
+                            rel="noopener noreferrer" aria-label="Website">
                             <i class="ph ph-globe"></i>
                         </a>
                     </div>
@@ -191,6 +260,7 @@
                     <h3 id="modal-title" class="modal-title"></h3>
                     <p class="modal-designer"><span data-i18n="modal_designer"></span>: <span id="modal-student"
                             class="text-white"></span></p>
+                    <p id="modal-short-desc" class="modal-text modal-short-desc"></p>
                 </div>
 
                 <div class="modal-divider"></div>
@@ -209,6 +279,20 @@
                     <div id="modal-tools-container" class="modal-tools"></div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="global-filter-bar" class="global-filter-bar">
+        <div class="container global-filter-inner">
+            <label class="global-filter-label" for="global-class-filter" data-i18n="global_filter_class"></label>
+            <select id="global-class-filter" class="global-filter-select">
+                <option value="all" data-i18n="filter_all"></option>
+                <option value="y1" data-i18n="filter_y1"></option>
+                <option value="y2" data-i18n="filter_y2"></option>
+                <option value="y3" data-i18n="filter_y3"></option>
+                <option value="y4" data-i18n="filter_y4"></option>
+            </select>
+            <input id="global-student-search-input" class="global-filter-input" type="text">
         </div>
     </div>
 

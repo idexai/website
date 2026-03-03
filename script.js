@@ -1,5 +1,6 @@
 let currentLang = localStorage.getItem('idex_lang') || 'tr';
-let activeFilter = 'all';
+let globalSearchQuery = '';
+let globalClassFilter = 'all';
 
 function updateLangButtonClasses(trId, enId, lang) {
     const trBtn = document.getElementById(trId);
@@ -21,32 +22,35 @@ function setLanguage(lang) {
             el.innerHTML = translations[lang][key];
         }
     });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+        const key = el.getAttribute('data-i18n-aria');
+        if (translations[lang][key]) {
+            el.setAttribute('aria-label', translations[lang][key]);
+        }
+    });
 
     updateLangButtonClasses('lang-tr', 'lang-en', lang);
     updateLangButtonClasses('lang-tr-mobile', 'lang-en-mobile', lang);
 
-    if (document.getElementById('filters-container')) renderFilters();
     if (document.getElementById('instructors-grid')) renderInstructors();
-    if (document.getElementById('projects-grid')) renderProjects();
+    if (document.getElementById('projects-grid-eggdrop')) {
+        renderGlobalFilterBar();
+        renderExhibitions();
+    }
 }
 
-function renderFilters() {
-    const container = document.getElementById('filters-container');
-    if (!container) return;
-    const t = translations[currentLang];
-    container.innerHTML = `
-        <button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">${t.filter_all}</button>
-        <button class="filter-btn ${activeFilter === 'y1' ? 'active' : ''}" data-filter="y1">${t.filter_y1}</button>
-        <button class="filter-btn ${activeFilter === 'y2' ? 'active' : ''}" data-filter="y2">${t.filter_y2}</button>
-        <button class="filter-btn ${activeFilter === 'y3' ? 'active' : ''}" data-filter="y3">${t.filter_y3}</button>
-        <button class="filter-btn ${activeFilter === 'y4' ? 'active' : ''}" data-filter="y4">${t.filter_y4}</button>
-    `;
+function setupDesignThinkingTimeline() {
+    const stepButtons = document.querySelectorAll('.dt-step-btn');
+    if (!stepButtons.length) return;
 
-    container.querySelectorAll('[data-filter]').forEach(btn => {
+    stepButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
-            activeFilter = btn.getAttribute('data-filter');
-            renderFilters();
-            renderProjects();
+            document.querySelectorAll('.dt-step').forEach((step) => step.classList.remove('is-active'));
+            stepButtons.forEach((item) => item.removeAttribute('aria-current'));
+
+            const parentStep = btn.closest('.dt-step');
+            if (parentStep) parentStep.classList.add('is-active');
+            btn.setAttribute('aria-current', 'step');
         });
     });
 }
@@ -57,16 +61,17 @@ function renderInstructors() {
     let html = '';
 
     instructors.forEach((inst) => {
-        const avatarUrl = inst.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${inst.name}&backgroundColor=030303,1a1a1a&shape1Color=ffffff&shape2Color=444444`;
+        const displayName = typeof inst.name === 'object' ? (inst.name[currentLang] || inst.name.tr || inst.name.en) : inst.name;
+        const avatarUrl = inst.image || `https://api.dicebear.com/7.x/shapes/svg?seed=${displayName}&backgroundColor=030303,1a1a1a&shape1Color=ffffff&shape2Color=444444`;
         const roleName = inst.role[currentLang];
 
         html += `
             <div class="person-card">
                 <div class="person-photo museum-img-wrapper">
-                    <img src="${avatarUrl}" alt="${inst.name}">
+                    <img src="${avatarUrl}" alt="${displayName}">
                 </div>
                 <div>
-                    <h3 class="person-name">${inst.name}</h3>
+                    <h3 class="person-name">${displayName}</h3>
                     <p class="person-role">${roleName}</p>
                 </div>
             </div>
@@ -76,20 +81,30 @@ function renderInstructors() {
     grid.innerHTML = html;
 }
 
-function renderProjects() {
-    const grid = document.getElementById('projects-grid');
+function getProjectGroup(project) {
+    const yearText = `${project.year.tr} ${project.year.en}`;
+    return yearText.includes('1') ? 'eggdrop' : 'hotbeverage';
+}
+
+function getProjectYearLevel(project) {
+    const yearText = `${project.year.tr} ${project.year.en}`;
+    if (yearText.includes('1')) return 1;
+    if (yearText.includes('2')) return 2;
+    if (yearText.includes('3')) return 3;
+    if (yearText.includes('4')) return 4;
+    return null;
+}
+
+function renderProjectGrid(gridId, projectGroup, searchQuery, yearFilter = 'all') {
+    const grid = document.getElementById(gridId);
     if (!grid) return;
     let html = '';
-
-    const filteredProjects = projects.filter(proj => {
-        if (activeFilter === 'all') return true;
-        const yearText = `${proj.year.tr} ${proj.year.en}`;
-        if (activeFilter === 'y1') return yearText.includes('1');
-        if (activeFilter === 'y2') return yearText.includes('2');
-        if (activeFilter === 'y3') return yearText.includes('3');
-        if (activeFilter === 'y4') return yearText.includes('4');
-        return true;
-    });
+    const searchText = searchQuery.toLocaleLowerCase('tr-TR');
+    const filteredProjects = projects.filter(proj => (
+        getProjectGroup(proj) === projectGroup
+        && (yearFilter === 'all' || getProjectYearLevel(proj) === Number(yearFilter.replace('y', '')))
+        && (!searchText || proj.student.toLocaleLowerCase('tr-TR').includes(searchText))
+    ));
 
     filteredProjects.forEach(proj => {
         const yearName = proj.year[currentLang];
@@ -112,6 +127,53 @@ function renderProjects() {
     grid.innerHTML = html;
 }
 
+function renderExhibitions() {
+    renderProjectGrid('projects-grid-eggdrop', 'eggdrop', globalSearchQuery, globalClassFilter);
+    renderProjectGrid('projects-grid-hotbeverage', 'hotbeverage', globalSearchQuery, globalClassFilter);
+}
+
+function renderGlobalFilterBar() {
+    const classSelect = document.getElementById('global-class-filter');
+    const searchInput = document.getElementById('global-student-search-input');
+    if (!classSelect || !searchInput) return;
+    const t = translations[currentLang];
+    const allOption = classSelect.querySelector('option[value="all"]');
+    if (allOption) {
+        allOption.textContent = currentLang === 'tr'
+            ? `Tümü (${projects.length})`
+            : `All (${projects.length})`;
+    }
+    searchInput.placeholder = t.student_search_placeholder;
+    searchInput.value = globalSearchQuery;
+    classSelect.value = globalClassFilter;
+
+    classSelect.onchange = () => {
+        globalClassFilter = classSelect.value;
+        renderExhibitions();
+    };
+
+    searchInput.oninput = () => {
+        globalSearchQuery = searchInput.value.trim();
+        renderExhibitions();
+    };
+}
+
+function setupGlobalFilterVisibility() {
+    const exhibitionSection = document.getElementById('sergi');
+    const filterBar = document.getElementById('global-filter-bar');
+    if (!exhibitionSection || !filterBar) return;
+
+    const updateVisibility = () => {
+        const rect = exhibitionSection.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight * 0.92 && rect.bottom > window.innerHeight * 0.08;
+        filterBar.classList.toggle('visible', inView);
+    };
+
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('resize', updateVisibility);
+    updateVisibility();
+}
+
 const modal = document.getElementById('project-modal');
 
 function openModal(projectId) {
@@ -121,6 +183,12 @@ function openModal(projectId) {
     document.getElementById('modal-title').innerText = proj.title[currentLang];
     document.getElementById('modal-student').innerText = proj.student;
     document.getElementById('modal-year').innerText = proj.year[currentLang];
+    const shortDescEl = document.getElementById('modal-short-desc');
+    if (shortDescEl) {
+        const shortDesc = proj.short_desc?.[currentLang] || '';
+        shortDescEl.innerText = shortDesc;
+        shortDescEl.style.display = shortDesc ? 'block' : 'none';
+    }
     document.getElementById('modal-image').src = proj.image;
     document.getElementById('modal-pdf-btn').href = proj.pdf;
 
@@ -129,12 +197,14 @@ function openModal(projectId) {
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    document.body.classList.add('modal-open');
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+    document.body.classList.remove('modal-open');
     document.body.style.overflow = 'auto';
 }
 
@@ -144,4 +214,6 @@ document.addEventListener('keydown', function (event) {
 
 document.addEventListener('DOMContentLoaded', () => {
     setLanguage(currentLang);
+    setupGlobalFilterVisibility();
+    setupDesignThinkingTimeline();
 });
