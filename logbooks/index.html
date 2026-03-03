@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4 Raporlar - Video Wall</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Ana render alanı */
+        #projector-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Projektör lensi / Eski CRT efekti için Vignette */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+            z-index: 10;
+        }
+
+        /* Hafif film titremesi efekti */
+        .flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-color: rgba(255, 255, 255, 0.02);
+            z-index: 11;
+            animation: flickerAnim 0.15s infinite alternate;
+        }
+
+        @keyframes flickerAnim {
+            0% {
+                opacity: 0.2;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Gizli Kontrol Paneli (Sergi kurulumu için) */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            color: #555;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            z-index: 100;
+            width: 300px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        #control-panel.show {
+            transform: translateX(0);
+        }
+
+        #control-panel h2 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            z-index: 50;
+        }
+
+        #top-title {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #folder-label {
+            position: absolute;
+            left: 50%;
+            bottom: 42px;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #switch-progress-track {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            width: min(420px, 62vw);
+            height: 8px;
+            background: rgba(30, 30, 30, 0.75);
+            border: 1px solid rgba(140, 140, 140, 0.45);
+            border-radius: 999px;
+            overflow: hidden;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #switch-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(180deg, #5f5f5f, #3f3f3f);
+            border-right: 1px solid #7a7a7a;
+            transition: width 0.1s linear;
+        }
+
+        button {
+            background: #555;
+            color: #000;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #777;
+        }
+
+        /* Yükleniyor ekranı */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="vignette"></div>
+    <div class="flicker"></div>
+    <div id="top-title">IDExAI.26 Logbooks</div>
+    <!--<div class="hint">Ayarlar için "D" tuşuna basın</div>-->
+    <div id="loading">İmajlar Yükleniyor...</div>
+    <div id="folder-label"></div>
+    <div id="switch-progress-track">
+        <div id="switch-progress-fill"></div>
+    </div>
+
+    <canvas id="projector-canvas"></canvas>
+
+    <div id="control-panel">
+        <h2>Sergi Kontrol Paneli</h2>
+
+        <div class="control-group">
+
+            <label>
+                <span>Demo Modu (Gerçek İmajlar Kapalı)</span>
+                <input type="checkbox" id="ctrl-demo">
+            </label>
+            <small style="color:#888; font-size:10px;">Kendi dosyalarınızı kullanmak için işareti kaldırın ve kod
+                içindeki klasör yolunu ayarlayın.</small>
+        </div>
+
+
+        <div class="control-group">
+            <label><span>Maksimum Hız</span> <span id="val-speed">0.8</span></label>
+            <input type="range" id="ctrl-speed" min="0.1" max="2.0" step="0.1" value="0.8">
+        </div>
+
+        <div class="control-group">
+            <label><span>Min. Okuma Süresi (sn)</span> <span id="val-pause-min">3</span></label>
+            <input type="range" id="ctrl-pause-min" min="1" max="10" step="1" value="3">
+        </div>
+
+        <div class="control-group">
+            <label><span>Max. Okuma Süresi (sn)</span> <span id="val-pause-max">7</span></label>
+            <input type="range" id="ctrl-pause-max" min="2" max="20" step="1" value="7">
+        </div>
+
+        <div class="control-group">
+            <label><span>Klasör Değişim Süresi (sn)</span> <span id="val-folder-switch">60</span></label>
+            <input type="range" id="ctrl-folder-switch" min="10" max="300" step="5" value="60">
+        </div>
+
+        <button id="btn-restart">Sıfırla ve Yeniden Başlat</button>
+    </div>
+
+
+    <script>
+        /**
+         * SERGİ AYARLARI
+         * Kendi klasörünüzdeki dosyaları kullanmak için burayı düzenleyin.
+         */
+        const APP_CONFIG = {
+            // Gerçek resimlerinizi kullanırken bunu false yapın.
+            useDemoMode: false,
+
+            // Her rapor için bir klasör tanımlayın
+            // name: Ekranda görünecek klasör adı
+            // path: index.html'e göre klasör yolu
+            // totalImages: o klasördeki toplam görsel sayısı
+            reports: [
+                {
+                    name: 'Yağmur Gür', path: 'Yağmur Gür/', totalImages: 100
+                },
+                { name: 'Lara Özpetek', path: 'Lara Özpetek/', totalImages: 58 }
+            ],
+
+            // Klasörler arası geçiş süresi (ms) - 1 dakika
+            folderSwitchInterval: 60000,
+
+            // Dosya uzantısı
+            imageExtension: '.jpg',
+
+            // Arka plan rengi
+            pageBgColor: '#f4f4f0',
+
+            // Animasyon Fizik Ayarları
+            maxSpeed: 0.8,         // Sayfa/Kare hızı (Ne kadar yüksekse o kadar bulanık/hızlı geçer)
+            acceleration: 0.003,   // Hızlanma ivmesi
+            deceleration: 0.96,    // Yavaşlama sürtünmesi (1'e yaklaştıkça daha uzun sürede yavaşlar)
+
+            // Süre Ayarları (Milisaniye)
+            minRunTime: 3000,      // En az bu kadar süre hızlı akar
+            maxRunTime: 8000,      // En fazla bu kadar süre hızlı akar
+            minPauseTime: 3000,    // En az bu kadar saniye ekranda kalır
+            maxPauseTime: 7000     // En fazla bu kadar saniye ekranda kalır
+        };
+
+        // --- SİSTEM DEĞİŞKENLERİ ---
+        const canvas = document.getElementById('projector-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimizasyon: Arka plan transparan değil
+        const folderLabelEl = document.getElementById('folder-label');
+        const switchProgressTrackEl = document.getElementById('switch-progress-track');
+        const switchProgressFillEl = document.getElementById('switch-progress-fill');
+
+        let width, height;
+        let pageW, pageH, gap;
+
+        // Durum Makinesi: 'SPEEDING_UP', 'FAST_FORWARD', 'SLOWING_DOWN', 'SNAPPING', 'PAUSED'
+        let state = 'PAUSED';
+        let currentPosition = 0; // Hangi sayfa indeksinde olduğumuz (ondalıklı olabilir)
+        let currentSpeed = 0;
+        let stateTimer = 0; // Bir sonraki duruma geçiş için sayaç
+        let lastTime = 0;
+
+        let activeReportIndex = 0;
+        let nextFolderSwitchAt = 0;
+
+        // İmaj Önbelleği (Sadece gerçek imajlar kullanılırken)
+        const imageCache = new Map();
+        const demoCanvasCache = new Map(); // Demo A4 sayfalarını bir kere çizip saklamak için
+
+        function getActiveReport() {
+            return APP_CONFIG.reports[activeReportIndex] || APP_CONFIG.reports[0];
+        }
+
+        function getTotalImages() {
+            const report = getActiveReport();
+            return Math.max(1, report.totalImages || 1);
+        }
+
+        function updateFolderLabel() {
+            const report = getActiveReport();
+            const totalReports = APP_CONFIG.reports.length;
+            const currentOrder = totalReports > 0 ? activeReportIndex + 1 : 0;
+            folderLabelEl.textContent = `${report.name} | ${currentOrder}/${totalReports}`;
+        }
+
+        function switchToNextReport(now) {
+            if (!APP_CONFIG.reports.length) return;
+            activeReportIndex = (activeReportIndex + 1) % APP_CONFIG.reports.length;
+            currentPosition = 0;
+            currentSpeed = 0;
+            state = 'PAUSED';
+            stateTimer = now + 500;
+            nextFolderSwitchAt = now + APP_CONFIG.folderSwitchInterval;
+            updateFolderLabel();
+        }
+
+        function updateSwitchProgress(now) {
+            if (APP_CONFIG.reports.length <= 1) {
+                switchProgressTrackEl.style.display = 'none';
+                return;
+            }
+            switchProgressTrackEl.style.display = 'block';
+            const remaining = Math.max(0, nextFolderSwitchAt - now);
+            const elapsed = APP_CONFIG.folderSwitchInterval - remaining;
+            const percent = Math.min(100, Math.max(0, (elapsed / APP_CONFIG.folderSwitchInterval) * 100));
+            switchProgressFillEl.style.width = `${percent.toFixed(2)}%`;
+        }
+
+        // --- YARDIMCI FONKSİYONLAR ---
+
+        // Dosya adı formatlayıcı (Örn: 1 -> "0-01")
+        function formatFileName(index) {
+            return '0-' + String(index + 1).padStart(2, '0') + APP_CONFIG.imageExtension;
+        }
+
+        // Rastgele sayı üretici
+        function randomRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // --- ÇİZİM ve EKRAN YÖNETİMİ ---
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            // A4 Oranı: 1:1.414. Ekrana sığacak şekilde boyutlandır.
+            pageH = height * 0.85; // Ekran yüksekliğinin %85'i
+            pageW = pageH / 1.414;
+            gap = pageW * 0.2; // Sayfalar arası boşluk
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Görüntü yükleyici (Gerçek dosyalar için)
+        function getRealImage(index) {
+            const report = getActiveReport();
+            const cacheKey = `${report.path}::${index}`;
+
+            if (imageCache.has(cacheKey)) {
+                return imageCache.get(cacheKey);
+            }
+
+            // Hafızayı korumak için önbellekteki resim sayısı 50'yi geçerse eskileri sil
+            if (imageCache.size > 50) {
+                const firstKey = imageCache.keys().next().value;
+                imageCache.delete(firstKey);
+            }
+
+            const img = new Image();
+            img.src = report.path + formatFileName(index);
+            img.loaded = false;
+            img.onload = () => { img.loaded = true; };
+            img.onerror = () => { img.error = true; }; // Dosya yoksa çökmeyi engelle
+
+            imageCache.set(cacheKey, img);
+            return img;
+        }
+
+        // Demo modunda rastgele bir A4 sayfa canvas'ı oluşturur
+        function getDemoPage(index) {
+            if (demoCanvasCache.has(index)) return demoCanvasCache.get(index);
+
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = 800;
+            offCanvas.height = 800 * 1.414;
+            const oCtx = offCanvas.getContext('2d');
+
+            // Sayfa arka planı
+            oCtx.fillStyle = APP_CONFIG.pageBgColor;
+            oCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+            // Başlık
+            oCtx.fillStyle = '#111';
+            oCtx.font = 'bold 60px Arial';
+            oCtx.fillText('GİZLİ RAPOR', 50, 100);
+            oCtx.font = '30px Courier New';
+            oCtx.fillText(`BELGE NO: ${formatFileName(index)}`, 50, 150);
+
+            // Rastgele Satırlar (Metin simülasyonu)
+            oCtx.fillStyle = '#444';
+            for (let i = 0; i < 30; i++) {
+                let y = 250 + (i * 25);
+                let w = 400 + Math.random() * 300;
+                oCtx.fillRect(50, y, w, 12);
+            }
+
+            // Mühür / Damga simülasyonu
+            if (Math.random() > 0.6) {
+                oCtx.strokeStyle = 'rgba(200, 50, 50, 0.5)';
+                oCtx.lineWidth = 10;
+                oCtx.beginPath();
+                oCtx.arc(offCanvas.width - 150, 150, 80, 0, Math.PI * 2);
+                oCtx.stroke();
+                oCtx.fillStyle = 'rgba(200, 50, 50, 0.5)';
+                oCtx.font = 'bold 30px Arial';
+                oCtx.save();
+                oCtx.translate(offCanvas.width - 150, 150);
+                oCtx.rotate(-Math.PI / 4);
+                oCtx.fillText('ONAYLI', -60, 10);
+                oCtx.restore();
+            }
+
+            demoCanvasCache.set(index, offCanvas);
+            return offCanvas;
+        }
+
+        // Tek bir sayfayı çizer
+        function drawPage(index, x, y) {
+            const totalImages = getTotalImages();
+
+            // Gerçek sayfa indeksini bul (Negatif veya taşan indeksleri düzelt)
+            let actualIndex = index % totalImages;
+            if (actualIndex < 0) actualIndex += totalImages;
+
+            ctx.save();
+
+            // Hafif gölge
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 30;
+            ctx.shadowOffsetX = 10;
+            ctx.shadowOffsetY = 10;
+
+            if (APP_CONFIG.useDemoMode) {
+                const demoCanvas = getDemoPage(actualIndex);
+                ctx.drawImage(demoCanvas, x, y, pageW, pageH);
+            } else {
+                const img = getRealImage(actualIndex);
+                if (img.loaded) {
+                    ctx.drawImage(img, x, y, pageW, pageH);
+                } else {
+                    // Yüklenene kadar yer tutucu çiz
+                    ctx.fillStyle = APP_CONFIG.pageBgColor;
+                    ctx.fillRect(x, y, pageW, pageH);
+                    ctx.shadowColor = 'transparent'; // Yazıda gölge olmasın
+                    ctx.fillStyle = '#888';
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Yükleniyor...', x + pageW / 2, y + pageH / 2);
+                }
+            }
+            ctx.restore();
+        }
+
+        // --- ANİMASYON VE FİZİK DÖNGÜSÜ ---
+
+        function updateLogic(dt) {
+            const totalImages = getTotalImages();
+
+            // Zaman hesaplaması (Milisecond)
+            const now = performance.now();
+
+            if (APP_CONFIG.reports.length > 1 && now >= nextFolderSwitchAt) {
+                switchToNextReport(now);
+            }
+            updateSwitchProgress(now);
+
+            switch (state) {
+                case 'PAUSED':
+                    // Süre dolduğunda hızlanmaya başla
+                    if (now > stateTimer) {
+                        state = 'SPEEDING_UP';
+                        // Hızlı akma süresini belirle
+                        stateTimer = now + randomRange(APP_CONFIG.minRunTime, APP_CONFIG.maxRunTime);
+                    }
+                    break;
+
+                case 'SPEEDING_UP':
+                    currentSpeed += APP_CONFIG.acceleration;
+                    if (currentSpeed >= APP_CONFIG.maxSpeed) {
+                        currentSpeed = APP_CONFIG.maxSpeed;
+                        state = 'FAST_FORWARD';
+                    }
+                    break;
+
+                case 'FAST_FORWARD':
+                    // Süre dolduğunda yavaşlamaya başla
+                    if (now > stateTimer) {
+                        state = 'SLOWING_DOWN';
+                    }
+                    break;
+
+                case 'SLOWING_DOWN':
+                    currentSpeed *= APP_CONFIG.deceleration;
+                    // Hız çok düştüğünde en yakın sayfaya "kitlenme" (snapping) moduna geç
+                    if (currentSpeed < 0.03) {
+                        state = 'SNAPPING';
+                    }
+                    break;
+
+                case 'SNAPPING':
+                    // Hedef: En yakın tam sayı indeks
+                    let targetPos = Math.round(currentPosition);
+
+                    // Hedefe yumuşak yaklaşım (Easing)
+                    let diff = targetPos - currentPosition;
+                    currentPosition += diff * 0.1;
+                    currentSpeed = 0;
+
+                    // Yeterince yaklaştıysak dur
+                    if (Math.abs(diff) < 0.005) {
+                        currentPosition = targetPos;
+                        state = 'PAUSED';
+                        // Okuma/bekleme süresini belirle
+                        stateTimer = now + randomRange(APP_CONFIG.minPauseTime, APP_CONFIG.maxPauseTime);
+                    }
+                    break;
+            }
+
+            // Pozisyonu hız kadar ileri al
+            if (state !== 'SNAPPING') {
+                currentPosition += currentSpeed;
+            }
+
+            // Döngüsel Sonsuzluk (Sınırı aşarsa başa sar, çok büyük sayılardan kaçın)
+            if (currentPosition >= totalImages) {
+                currentPosition -= totalImages;
+            }
+        }
+
+        function render() {
+            // Arka planı temizle
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, width, height);
+
+            const centerY = (height - pageH) / 2;
+            const centerX = width / 2;
+
+            // Hangi sayfaların ekranda görüneceğini hesapla
+            // currentPosition = 5.2 demek: 5. sayfa merkezden biraz sola kaymış demek.
+            const centerIndex = Math.floor(currentPosition);
+            const offsetFraction = currentPosition - centerIndex; // 0 ile 1 arası
+
+            // Tam merkeze denk gelen x koordinatı (kayma miktarı çıkarılarak)
+            const baseX = centerX - (pageW / 2) - (offsetFraction * (pageW + gap));
+
+            // Ekrana sığacak kadar (sol ve sağ) sayfaları çiz
+            // Normalde 1 ekran genişliğine 3-4 sayfa sığar. -2'den +3'e kadar çiziyoruz.
+            for (let i = -2; i <= 3; i++) {
+                let drawIndex = centerIndex + i;
+                let drawX = baseX + (i * (pageW + gap));
+
+                // Sadece ekranın içindeyse çiz (Optimizasyon)
+                if (drawX + pageW > -100 && drawX < width + 100) {
+                    drawPage(drawIndex, drawX, centerY);
+                }
+            }
+
+            // Hız efektleri: Çok hızlıyken ekran kenarlarına hareket bulanıklığı veya karanlık eklenebilir.
+            if (currentSpeed > 0.5) {
+                ctx.fillStyle = `rgba(0,0,0, ${(currentSpeed - 0.5) * 0.5})`;
+                ctx.fillRect(0, 0, width, height);
+            }
+        }
+
+        function loop(timestamp) {
+            let dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            updateLogic(dt);
+            render();
+
+            requestAnimationFrame(loop);
+        }
+
+        // --- KONTROL PANELİ VE ETKİLEŞİM ---
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'd') {
+                document.getElementById('control-panel').classList.toggle('show');
+            }
+        });
+
+        // Arayüz Bağlantıları
+        document.getElementById('ctrl-demo').addEventListener('change', (e) => {
+            APP_CONFIG.useDemoMode = e.target.checked;
+        });
+
+        document.getElementById('ctrl-speed').addEventListener('input', (e) => {
+            APP_CONFIG.maxSpeed = parseFloat(e.target.value);
+            document.getElementById('val-speed').innerText = APP_CONFIG.maxSpeed.toFixed(1);
+        });
+
+        document.getElementById('ctrl-pause-min').addEventListener('input', (e) => {
+            APP_CONFIG.minPauseTime = parseInt(e.target.value) * 1000;
+            document.getElementById('val-pause-min').innerText = e.target.value;
+        });
+
+        document.getElementById('ctrl-pause-max').addEventListener('input', (e) => {
+            APP_CONFIG.maxPauseTime = parseInt(e.target.value) * 1000;
+            document.getElementById('val-pause-max').innerText = e.target.value;
+        });
+
+        document.getElementById('ctrl-folder-switch').addEventListener('input', (e) => {
+            const seconds = parseInt(e.target.value, 10);
+            APP_CONFIG.folderSwitchInterval = seconds * 1000;
+            document.getElementById('val-folder-switch').innerText = String(seconds);
+            nextFolderSwitchAt = performance.now() + APP_CONFIG.folderSwitchInterval;
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            state = 'SPEEDING_UP';
+            currentSpeed = 0;
+            stateTimer = 0;
+        });
+
+        // Başlangıç Ayarı
+        document.getElementById('ctrl-demo').checked = APP_CONFIG.useDemoMode;
+        document.getElementById('ctrl-folder-switch').value = String(APP_CONFIG.folderSwitchInterval / 1000);
+        document.getElementById('val-folder-switch').innerText = String(APP_CONFIG.folderSwitchInterval / 1000);
+        updateFolderLabel();
+        stateTimer = performance.now() + 2000; // İlk 2 saniye beklesin, sonra başlasın
+        nextFolderSwitchAt = performance.now() + APP_CONFIG.folderSwitchInterval;
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+
+</html>
