@@ -15,7 +15,7 @@
         :root {
             --text: #ffffff;
             --line: rgba(255, 255, 255, 0.1);
-            --panel: rgba(0, 0, 0, .4);
+            --panel: rgba(0, 0, 0, .2);
             --panel-soft: rgba(255, 255, 255, 0.05);
             background-color: #000;
         }
@@ -42,25 +42,21 @@
             width: min(940px, 100%);
             background: var(--panel);
             border-radius: 20px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             padding: 28px;
             text-align: center;
             box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+            border: 1px solid var(--line);
         }
 
-        h1 {
-            font-size: clamp(2rem, 5.2vw, 4rem);
-            line-height: 1.05;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
 
         .subtitle {
-            font-size: clamp(1rem, 2vw, 1.3rem);
-            font-weight: 500;
+            font-size: 1.5rem;
+            font-weight: 600;
             opacity: 0.94;
             margin-bottom: 18px;
             text-transform: uppercase;
+            letter-spacing: 0.1rem;
         }
 
         .description {
@@ -70,6 +66,7 @@
             text-align: justify;
             color: #ccc;
             margin: 0 auto .5rem;
+
 
         }
 
