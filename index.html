@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDExAI.26 | Designig with Intelligence</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --text: #ffffff;
+            --line: rgba(255, 255, 255, 0.1);
+            --panel: rgba(0, 0, 0, .4);
+            --panel-soft: rgba(255, 255, 255, 0.05);
+            background-color: #000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+            background:
+                url('./assets/ai-70bk.jpg') center center / cover no-repeat fixed;
+        }
+
+        .page {
+            width: min(940px, 100%);
+            background: var(--panel);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            padding: 28px;
+            text-align: center;
+            box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5.2vw, 4rem);
+            line-height: 1.05;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 500;
+            opacity: 0.94;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        .description {
+            max-width: 810px;
+            font-size: .8rem;
+            opacity: 0.96;
+            text-align: justify;
+            color: #ccc;
+            margin: 0 auto .5rem;
+
+        }
+
+        .logo {
+            margin: auto auto 1rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            width: 120px;
+        }
+
+
+        .meta {
+            margin: 18px auto 0;
+            max-width: 840px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--panel-soft);
+            padding: 14px 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .meta p {
+            font-size: 0.8rem;
+            line-height: 1.5;
+            opacity: 0.95;
+            margin: 0;
+            text-align: left;
+            font-weight: 300;
+            color: #ccc;
+        }
+
+        .meta p strong {
+            display: block;
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.85;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .countdown-wrap {
+            padding-top: 1rem;
+
+        }
+
+        .countdown-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.86;
+            margin-bottom: 10px;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .time-box {
+            min-width: 72px;
+        }
+
+        .time-number {
+            font-size: clamp(1.35rem, 3vw, 2rem);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .time-label {
+            margin-top: 4px;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            opacity: 0.8;
+        }
+
+        .cta {
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 0.86rem;
+            letter-spacing: 0.03em;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+                background-attachment: scroll;
+            }
+
+            .page {
+                padding: 20px 16px;
+                border-radius: 14px;
+            }
+
+
+            .time-box {
+                min-width: 62px;
+            }
+
+            .meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <img src="./assets/logos/idexai26.svg" alt="IDExAI.26" class="logo">
+        <p class="subtitle">Designing with Intelligence</p>
+
+        <p class="description">
+            IDExAI.26 is a pilot educational program at Özyeğin University’s Department of Industrial Design,
+            exploring how generative AI can be integrated into studio-based design education. <br><br>
+            This exhibition presents student projects from Year 1–4 studios,
+            documenting how emerging AI tools are shaping contemporary design workflows.
+        </p>
+
+
+        <section class="meta" aria-label="Exhibition Information">
+            <p><strong>Location</strong>AB4 Faculty of Architecture & Design<br>Ground Floor Exhibition Hall</p>
+            <p><strong>Exhibition Dates</strong> March 16–30, 2026</p>
+        </section>
+
+        <section class="countdown-wrap" aria-label="Time remaining until opening">
+            <p class="countdown-title">Exhibition Opening In</p>
+            <div class="countdown" id="countdown">
+                <div class="time-box">
+                    <div class="time-number" id="days">00</div>
+                    <div class="time-label">Days</div>
+                </div>
+                <div class="time-box">
+                    <div class="time-number" id="hours">00</div>
+                    <div class="time-label">Hours</div>
+                </div>
+                <div class="time-box">
+                    <div class="time-number" id="minutes">00</div>
+                    <div class="time-label">Mins</div>
+                </div>
+                <div class="time-box">
+                    <div class="time-number" id="seconds">00</div>
+                    <div class="time-label">Secs</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const targetDate = new Date('2026-03-16T10:30:00+03:00').getTime();
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+
+        function updateCountdown() {
+            const now = Date.now();
+            const distance = targetDate - now;
+
+            if (distance <= 0) {
+                daysEl.textContent = '00';
+                hoursEl.textContent = '00';
+                minutesEl.textContent = '00';
+                secondsEl.textContent = '00';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((distance / (1000 * 60)) % 60);
+            const seconds = Math.floor((distance / 1000) % 60);
+
+            daysEl.textContent = String(days).padStart(2, '0');
+            hoursEl.textContent = String(hours).padStart(2, '0');
+            minutesEl.textContent = String(minutes).padStart(2, '0');
+            secondsEl.textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
+</body>
+
+</html>
