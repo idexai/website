@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4 Reports - Video Wall</title>
+    <style>
+        :root {
+            --bg-color: #000;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Ana render alanı */
+        #projector-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Projektör lensi / Eski CRT efekti için Vignette */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+            z-index: 10;
+        }
+
+        /* Hafif film titremesi efekti */
+        .flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-color: rgba(255, 255, 255, 0.02);
+            z-index: 11;
+            animation: flickerAnim 0.15s infinite alternate;
+        }
+
+        @keyframes flickerAnim {
+            0% {
+                opacity: 0.2;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Hidden control panel */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            color: #555;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            z-index: 100;
+            width: min(720px, calc(100vw - 40px));
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        #control-panel.show {
+            transform: translateX(0);
+        }
+
+        #control-panel h2 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        #controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 12px;
+        }
+
+        .full-span {
+            grid-column: 1 / -1;
+        }
+
+        .section-title {
+            margin: 2px 0 0;
+            padding-top: 8px;
+            border-top: 1px solid #333;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #a8a8a8;
+        }
+
+        .control-input-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mini-reset {
+            width: auto;
+            margin-top: 0;
+            padding: 3px 8px;
+            font-size: 10px;
+            background: #3d3d3d;
+            color: #bbb;
+            border: 1px solid #666;
+        }
+
+        .mini-reset:hover {
+            background: #5a5a5a;
+            color: #eee;
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            z-index: 50;
+        }
+
+        #top-title {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #folder-label {
+            position: absolute;
+            left: 50%;
+            bottom: 42px;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #switch-progress-track {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            width: min(420px, 62vw);
+            height: 8px;
+            background: rgba(30, 30, 30, 0.75);
+            border: 1px solid rgba(140, 140, 140, 0.45);
+            border-radius: 999px;
+            overflow: hidden;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #switch-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #3a3a3a;
+            transition: width 0.1s linear;
+        }
+
+        button {
+            background: #555;
+            color: #000;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #777;
+        }
+
+        #btn-audio-toggle {
+            background: rgba(0, 0, 0, 0.45);
+            color: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+        }
+
+        #btn-audio-toggle:hover {
+            background: rgba(25, 25, 25, 0.62);
+        }
+
+        .ios-switch {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 38px;
+            height: 22px;
+            background: #3a3a3a;
+            border-radius: 999px;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .ios-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            background: #e8e8e8;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .ios-switch:checked {
+            background: #7a7a7a;
+        }
+
+        .ios-switch:checked::after {
+            transform: translateX(16px);
+        }
+
+        #ios-switches-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="vignette"></div>
+    <div class="flicker"></div>
+    <div id="top-title">IDExAI.26 Logbooks</div>
+    <!--<div class="hint">Press "D" for controls</div>-->
+    <div id="folder-label"></div>
+    <div id="switch-progress-track">
+        <div id="switch-progress-fill"></div>
+    </div>
+
+    <canvas id="projector-canvas"></canvas>
+
+    <div id="control-panel">
+        <h2>Exhibition Control Panel</h2>
+        <div id="controls-grid">
+            <div class="control-group full-span">
+                <label>
+                    <span>Demo Mode (Real Images Off)</span>
+                    <input type="checkbox" id="ctrl-demo">
+                </label>
+            </div>
+
+            <div class="section-title full-span">Timing</div>
+            <div class="control-group">
+                <label><span>Max Speed</span> <span id="val-speed">0.8</span></label>
+                <input type="range" id="ctrl-speed" min="0.1" max="2.0" step="0.1" value="0.8">
+            </div>
+            <div class="control-group">
+                <label><span>Min Reading Time (s)</span> <span id="val-pause-min">3</span></label>
+                <input type="range" id="ctrl-pause-min" min="1" max="10" step="1" value="3">
+            </div>
+            <div class="control-group">
+                <label><span>Max Reading Time (s)</span> <span id="val-pause-max">7</span></label>
+                <input type="range" id="ctrl-pause-max" min="2" max="20" step="1" value="7">
+            </div>
+            <div class="control-group">
+                <label><span>Folder Switch Time (s)</span> <span id="val-folder-switch">60</span></label>
+                <input type="range" id="ctrl-folder-switch" min="10" max="300" step="5" value="60">
+            </div>
+
+            <div class="section-title full-span">Image</div>
+            <div class="control-group">
+                <label><span>Vertical Keystone</span> <span id="val-v-keystone">0%</span></label>
+                <input type="range" id="ctrl-v-keystone" min="-35" max="35" step="1" value="0">
+            </div>
+            <div class="control-group">
+                <label><span>Zoom In / Out</span> <span id="val-zoom">100%</span></label>
+                <input type="range" id="ctrl-zoom" min="70" max="130" step="1" value="100">
+            </div>
+            <div class="control-group">
+                <label><span>Page Gap</span> <span id="val-gap">5%</span></label>
+                <input type="range" id="ctrl-gap" min="0" max="25" step="1" value="5">
+            </div>
+            <div class="control-group">
+                <label><span>Vignette</span> <span id="val-vignette">0%</span></label>
+                <input type="range" id="ctrl-vignette" min="0" max="100" step="1" value="0">
+            </div>
+            <div class="control-group">
+                <label><span>Progress Bar Length</span> <span id="val-progress-width">62vw</span></label>
+                <input type="range" id="ctrl-progress-width" min="20" max="98" step="1" value="62">
+            </div>
+
+            <div class="section-title full-span">Sound</div>
+            <div class="control-group">
+                <label><span>Motor Pitch</span> <span id="val-pitch-motor">46 Hz</span></label>
+                <input type="range" id="ctrl-pitch-motor" min="20" max="120" step="1" value="46">
+            </div>
+            <div class="control-group">
+                <label><span>Sub Pitch</span> <span id="val-pitch-sub">23 Hz</span></label>
+                <input type="range" id="ctrl-pitch-sub" min="10" max="80" step="1" value="23">
+            </div>
+            <div class="control-group">
+                <label><span>Tick Pitch</span> <span id="val-pitch-tick">120 Hz</span></label>
+                <input type="range" id="ctrl-pitch-tick" min="60" max="400" step="1" value="120">
+            </div>
+            <div class="control-group">
+                <label><span>Standby Pitch</span> <span id="val-pitch-standby">820 Hz</span></label>
+                <input type="range" id="ctrl-pitch-standby" min="300" max="1600" step="10" value="820">
+            </div>
+
+            <div class="section-title full-span">Overlays</div>
+            <div id="ios-switches-row" class="full-span">
+                <div class="control-group">
+                    <label><span>Show Title</span><input class="ios-switch" type="checkbox" id="ctrl-show-title"
+                            checked></label>
+                </div>
+                <div class="control-group">
+                    <label><span>Show Folder Label</span><input class="ios-switch" type="checkbox" id="ctrl-show-folder"
+                            checked></label>
+                </div>
+                <div class="control-group">
+                    <label><span>Show Progress Bar</span><input class="ios-switch" type="checkbox"
+                            id="ctrl-show-progress" checked></label>
+                </div>
+                <div class="control-group">
+                    <label><span>Show Only 3 Pages</span><input class="ios-switch" type="checkbox"
+                            id="ctrl-show-only-three-pages"></label>
+                </div>
+            </div>
+
+            <div class="control-group full-span">
+                <label><span>Audio</span> <span id="val-audio-state">Off</span></label>
+                <button id="btn-audio-toggle">Enable Audio</button>
+                <button id="btn-playback-toggle">Pause</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        /**
+         * SERGİ AYARLARI
+         * Kendi klasörünüzdeki dosyaları kullanmak için burayı düzenleyin.
+         */
+        const APP_CONFIG = {
+            // Gerçek resimlerinizi kullanırken bunu false yapın.
+            useDemoMode: false,
+
+            // Her rapor için bir klasör tanımlayın
+            // name: Ekranda görünecek klasör adı
+            // path: index.html'e göre klasör yolu
+            // totalImages: o klasördeki toplam görsel sayısı
+            reports: [
+                {
+                    name: 'Logbook 1', path: './img-01/', totalImages: 100
+                }
+            ],
+
+            // Klasörler arası geçiş süresi (ms) - 1 dakika
+            folderSwitchInterval: 60000,
+
+            // Dosya uzantısı
+            imageExtension: '.jpg',
+
+            // Arka plan rengi
+            pageBgColor: '#f4f4f0',
+
+            // Animasyon Fizik Ayarları
+            maxSpeed: 0.8,         // Sayfa/Kare hızı (Ne kadar yüksekse o kadar bulanık/hızlı geçer)
+            acceleration: 0.003,   // Hızlanma ivmesi
+            deceleration: 0.96,    // Yavaşlama sürtünmesi (1'e yaklaştıkça daha uzun sürede yavaşlar)
+
+            // Projektör yukarı/aşağı açı kaynaklı düşey keystone düzeltme
+            verticalKeystone: 0,
+            pageScale: 1.0,
+            pageGapScale: 0.05,
+            vignetteIntensity: 0,
+
+            motorBaseFreq: 46,
+            motorSubBaseFreq: 23,
+            tickToneFreq: 120,
+            standbyBaseFreq: 820,
+            showTopTitle: true,
+            showFolderLabel: true,
+            showProgressBar: true,
+            showOnlyThreePages: false,
+            progressBarWidthVw: 62,
+
+            // Süre Ayarları (Milisaniye)
+            minRunTime: 3000,      // En az bu kadar süre hızlı akar
+            maxRunTime: 8000,      // En fazla bu kadar süre hızlı akar
+            minPauseTime: 3000,    // En az bu kadar saniye ekranda kalır
+            maxPauseTime: 7000     // En fazla bu kadar saniye ekranda kalır
+        };
+
+        // --- SİSTEM DEĞİŞKENLERİ ---
+        const canvas = document.getElementById('projector-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimizasyon: Arka plan transparan değil
+        const sceneCanvas = document.createElement('canvas');
+        const sceneCtx = sceneCanvas.getContext('2d', { alpha: false });
+        const vignetteEl = document.querySelector('.vignette');
+        const topTitleEl = document.getElementById('top-title');
+        const folderLabelEl = document.getElementById('folder-label');
+        const switchProgressTrackEl = document.getElementById('switch-progress-track');
+        const switchProgressFillEl = document.getElementById('switch-progress-fill');
+
+        let width, height;
+        let pageW, pageH, gap;
+        let isAudioEnabled = false;
+        let isPlaybackPaused = false;
+
+        // Durum Makinesi: 'SPEEDING_UP', 'FAST_FORWARD', 'SLOWING_DOWN', 'SNAPPING', 'PAUSED'
+        let state = 'PAUSED';
+        let currentPosition = 0; // Hangi sayfa indeksinde olduğumuz (ondalıklı olabilir)
+        let currentSpeed = 0;
+        let stateTimer = 0; // Bir sonraki duruma geçiş için sayaç
+        let lastTime = 0;
+
+        let activeReportIndex = 0;
+        let nextFolderSwitchAt = 0;
+
+        // İmaj Önbelleği (Sadece gerçek imajlar kullanılırken)
+        const imageCache = new Map();
+        const demoCanvasCache = new Map(); // Demo A4 sayfalarını bir kere çizip saklamak için
+
+        // Web Audio ile mekanik projektör sesi
+        const audioEngine = {
+            context: null,
+            masterGain: null,
+            motorOsc: null,
+            motorGain: null,
+            motorSubOsc: null,
+            motorSubGain: null,
+            tickOsc: null,
+            tickGain: null,
+            tickLfo: null,
+            tickLfoGain: null,
+            standbyOsc: null,
+            standbyGain: null,
+            standbyLfo: null,
+            standbyLfoGain: null,
+            initialized: false
+        };
+
+        function initProjectorAudio() {
+            if (audioEngine.initialized) return;
+
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            const ac = new AudioCtx();
+            audioEngine.context = ac;
+
+            const masterGain = ac.createGain();
+            masterGain.gain.value = 0.0;
+            masterGain.connect(ac.destination);
+            audioEngine.masterGain = masterGain;
+
+            const motorOsc = ac.createOscillator();
+            motorOsc.type = 'triangle';
+            motorOsc.frequency.value = APP_CONFIG.motorBaseFreq; // Ana çark tonu
+            const motorGain = ac.createGain();
+            motorGain.gain.value = 0.0;
+            motorOsc.connect(motorGain).connect(masterGain);
+            motorOsc.start();
+            audioEngine.motorOsc = motorOsc;
+            audioEngine.motorGain = motorGain;
+
+            const motorSubOsc = ac.createOscillator();
+            motorSubOsc.type = 'sine';
+            motorSubOsc.frequency.value = APP_CONFIG.motorSubBaseFreq; // Alt frekans gövdesi
+            const motorSubGain = ac.createGain();
+            motorSubGain.gain.value = 0.0;
+            motorSubOsc.connect(motorSubGain).connect(masterGain);
+            motorSubOsc.start();
+            audioEngine.motorSubOsc = motorSubOsc;
+            audioEngine.motorSubGain = motorSubGain;
+
+            const tickOsc = ac.createOscillator();
+            tickOsc.type = 'square';
+            tickOsc.frequency.value = APP_CONFIG.tickToneFreq; // Tık karakter tonu
+            const tickBand = ac.createBiquadFilter();
+            tickBand.type = 'bandpass';
+            tickBand.frequency.value = 1400;
+            tickBand.Q.value = 4.5;
+            const tickGain = ac.createGain();
+            tickGain.gain.value = 0.0;
+            tickOsc.connect(tickBand).connect(tickGain).connect(masterGain);
+            tickOsc.start();
+            audioEngine.tickOsc = tickOsc;
+            audioEngine.tickGain = tickGain;
+
+            const tickLfo = ac.createOscillator();
+            tickLfo.type = 'square';
+            tickLfo.frequency.value = 4; // Tıkların temel ritim hızı (Hz).
+            const tickLfoGain = ac.createGain();
+            tickLfoGain.gain.value = 0.0;
+            tickLfo.connect(tickLfoGain).connect(tickGain.gain);
+            tickLfo.start();
+            audioEngine.tickLfo = tickLfo;
+            audioEngine.tickLfoGain = tickLfoGain;
+
+            const standbyOsc = ac.createOscillator();
+            standbyOsc.type = 'sine';
+            standbyOsc.frequency.value = APP_CONFIG.standbyBaseFreq; // Standby pitch
+            const standbyGain = ac.createGain();
+            standbyGain.gain.value = 0.0;
+            standbyOsc.connect(standbyGain).connect(masterGain);
+            standbyOsc.start();
+            audioEngine.standbyOsc = standbyOsc;
+            audioEngine.standbyGain = standbyGain;
+
+            const standbyLfo = ac.createOscillator();
+            standbyLfo.type = 'sine';
+            standbyLfo.frequency.value = 1.6;
+            const standbyLfoGain = ac.createGain();
+            standbyLfoGain.gain.value = 0.0;
+            standbyLfo.connect(standbyLfoGain).connect(standbyGain.gain);
+            standbyLfo.start();
+            audioEngine.standbyLfo = standbyLfo;
+            audioEngine.standbyLfoGain = standbyLfoGain;
+
+            audioEngine.initialized = true;
+        }
+
+        function unlockProjectorAudio() {
+            initProjectorAudio();
+            if (!audioEngine.initialized) return;
+            audioEngine.context.resume();
+            isAudioEnabled = true;
+            document.getElementById('val-audio-state').innerText = 'On';
+            document.getElementById('btn-audio-toggle').innerText = 'Disable Audio';
+        }
+
+        function toggleAudio() {
+            initProjectorAudio();
+            if (!audioEngine.initialized) return;
+
+            if (isAudioEnabled) {
+                audioEngine.context.suspend();
+                isAudioEnabled = false;
+                document.getElementById('val-audio-state').innerText = 'Off';
+                document.getElementById('btn-audio-toggle').innerText = 'Enable Audio';
+                return;
+            }
+
+            unlockProjectorAudio();
+        }
+
+        function updateProjectorAudio() {
+            if (!audioEngine.initialized) return;
+
+            const ac = audioEngine.context;
+            const t = ac.currentTime;
+            const speedRatio = Math.max(0, Math.min(1, currentSpeed / Math.max(0.001, APP_CONFIG.maxSpeed)));
+            const moving = state !== 'PAUSED';
+
+            // Dururken düşük seviyeli standby sinyal kalır; hareket sırasında çark ve tik sesleri baskınlaşır.
+            const targetMaster = moving ? (0.22 + speedRatio * 0.24) : 0.08; // Genel ses seviyesi
+            const targetMotor = moving ? (0.05 + speedRatio * 0.14) : 0.0; // Ana çark seviyesi
+            const targetMotorSub = moving ? (0.035 + speedRatio * 0.09) : 0.0; // Alt gövde seviyesi
+            const targetTickBase = moving ? (0.012 + speedRatio * 0.03) : 0.0; // Tıkların ana seviyesi
+            const targetTickPulseDepth = moving ? (0.02 + speedRatio * 0.05) : 0.0; // Tık vurgu derinliği
+            const targetStandby = moving ? 0.0 : 0.011; // Dururken sinyal seviyesi
+            const targetStandbyLfo = moving ? 0.0 : 0.006; // Dururken sinyal dalgalanması
+
+            audioEngine.masterGain.gain.setTargetAtTime(targetMaster, t, 0.08);
+            audioEngine.motorGain.gain.setTargetAtTime(targetMotor, t, 0.06);
+            audioEngine.motorSubGain.gain.setTargetAtTime(targetMotorSub, t, 0.06);
+            audioEngine.tickGain.gain.setTargetAtTime(targetTickBase, t, 0.05);
+            audioEngine.tickLfoGain.gain.setTargetAtTime(targetTickPulseDepth, t, 0.05);
+            audioEngine.standbyGain.gain.setTargetAtTime(targetStandby, t, 0.09);
+            audioEngine.standbyLfoGain.gain.setTargetAtTime(targetStandbyLfo, t, 0.09);
+
+            const motorFreq = APP_CONFIG.motorBaseFreq * (0.35 + speedRatio * 0.75);
+            const motorSubFreq = APP_CONFIG.motorSubBaseFreq * (0.8 + speedRatio * 0.6);
+            const tickRate = 3 + (speedRatio * 11); // Hıza bağlı tık ritmi
+            const standbyFreq = moving ? APP_CONFIG.standbyBaseFreq : (APP_CONFIG.standbyBaseFreq * 0.9);
+
+            audioEngine.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.08);
+            audioEngine.motorSubOsc.frequency.setTargetAtTime(motorSubFreq, t, 0.08);
+            audioEngine.tickOsc.frequency.setTargetAtTime(APP_CONFIG.tickToneFreq, t, 0.07);
+            audioEngine.tickLfo.frequency.setTargetAtTime(tickRate, t, 0.07);
+            audioEngine.standbyOsc.frequency.setTargetAtTime(standbyFreq, t, 0.08);
+        }
+
+        function getActiveReport() {
+            return APP_CONFIG.reports[activeReportIndex] || APP_CONFIG.reports[0];
+        }
+
+        function getTotalImages() {
+            const report = getActiveReport();
+            return Math.max(1, report.totalImages || 1);
+        }
+
+        function updateFolderLabel() {
+            const report = getActiveReport();
+            const totalReports = APP_CONFIG.reports.length;
+            const currentOrder = totalReports > 0 ? activeReportIndex + 1 : 0;
+            folderLabelEl.textContent = `${report.name} | ${currentOrder}/${totalReports}`;
+        }
+
+        function applyOverlaySettings() {
+            topTitleEl.style.display = APP_CONFIG.showTopTitle ? 'block' : 'none';
+            folderLabelEl.style.display = APP_CONFIG.showFolderLabel ? 'block' : 'none';
+            switchProgressTrackEl.style.width = `${APP_CONFIG.progressBarWidthVw}vw`;
+        }
+
+        function switchToNextReport(now) {
+            if (!APP_CONFIG.reports.length) return;
+            activeReportIndex = (activeReportIndex + 1) % APP_CONFIG.reports.length;
+            currentPosition = 0;
+            currentSpeed = 0;
+            state = 'PAUSED';
+            stateTimer = now + 500;
+            nextFolderSwitchAt = now + APP_CONFIG.folderSwitchInterval;
+            updateFolderLabel();
+        }
+
+        function updateSwitchProgress(now) {
+            if (!APP_CONFIG.showProgressBar || APP_CONFIG.reports.length <= 1) {
+                switchProgressTrackEl.style.display = 'none';
+                return;
+            }
+            switchProgressTrackEl.style.display = 'block';
+            const remaining = Math.max(0, nextFolderSwitchAt - now);
+            const elapsed = APP_CONFIG.folderSwitchInterval - remaining;
+            const percent = Math.min(100, Math.max(0, (elapsed / APP_CONFIG.folderSwitchInterval) * 100));
+            switchProgressFillEl.style.width = `${percent.toFixed(2)}%`;
+        }
+
+        // --- YARDIMCI FONKSİYONLAR ---
+
+        // Dosya adı formatlayıcı (Örn: 1 -> "0-01")
+        function formatFileName(index) {
+            return '0-' + String(index + 1).padStart(2, '0') + APP_CONFIG.imageExtension;
+        }
+
+        // Rastgele sayı üretici
+        function randomRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // --- ÇİZİM ve EKRAN YÖNETİMİ ---
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            sceneCanvas.width = width;
+            sceneCanvas.height = height;
+
+            // A4 Oranı: 1:1.414. Ekrana sığacak şekilde boyutlandır.
+            pageH = height * 0.84 * APP_CONFIG.pageScale; // Zoom ölçeği dahil
+            pageW = pageH / 1.414;
+            gap = pageW * APP_CONFIG.pageGapScale;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Görüntü yükleyici (Gerçek dosyalar için)
+        function getRealImage(index) {
+            const report = getActiveReport();
+            const cacheKey = `${report.path}::${index}`;
+
+            if (imageCache.has(cacheKey)) {
+                return imageCache.get(cacheKey);
+            }
+
+            // Hafızayı korumak için önbellekteki resim sayısı 50'yi geçerse eskileri sil
+            if (imageCache.size > 50) {
+                const firstKey = imageCache.keys().next().value;
+                imageCache.delete(firstKey);
+            }
+
+            const img = new Image();
+            img.src = report.path + formatFileName(index);
+            img.loaded = false;
+            img.onload = () => { img.loaded = true; };
+            img.onerror = () => { img.error = true; }; // Dosya yoksa çökmeyi engelle
+
+            imageCache.set(cacheKey, img);
+            return img;
+        }
+
+        // Demo modunda rastgele bir A4 sayfa canvas'ı oluşturur
+        function getDemoPage(index) {
+            if (demoCanvasCache.has(index)) return demoCanvasCache.get(index);
+
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = 800;
+            offCanvas.height = 800 * 1.414;
+            const oCtx = offCanvas.getContext('2d');
+
+            // Sayfa arka planı
+            oCtx.fillStyle = APP_CONFIG.pageBgColor;
+            oCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+            // Başlık
+            oCtx.fillStyle = '#111';
+            oCtx.font = 'bold 60px Arial';
+            oCtx.fillText('CONFIDENTIAL REPORT', 50, 100);
+            oCtx.font = '30px Courier New';
+            oCtx.fillText(`DOC NO: ${formatFileName(index)}`, 50, 150);
+
+            // Rastgele Satırlar (Metin simülasyonu)
+            oCtx.fillStyle = '#444';
+            for (let i = 0; i < 30; i++) {
+                let y = 250 + (i * 25);
+                let w = 400 + Math.random() * 300;
+                oCtx.fillRect(50, y, w, 12);
+            }
+
+            // Mühür / Damga simülasyonu
+            if (Math.random() > 0.6) {
+                oCtx.strokeStyle = 'rgba(200, 50, 50, 0.5)';
+                oCtx.lineWidth = 10;
+                oCtx.beginPath();
+                oCtx.arc(offCanvas.width - 150, 150, 80, 0, Math.PI * 2);
+                oCtx.stroke();
+                oCtx.fillStyle = 'rgba(200, 50, 50, 0.5)';
+                oCtx.font = 'bold 30px Arial';
+                oCtx.save();
+                oCtx.translate(offCanvas.width - 150, 150);
+                oCtx.rotate(-Math.PI / 4);
+                oCtx.fillText('APPROVED', -60, 10);
+                oCtx.restore();
+            }
+
+            demoCanvasCache.set(index, offCanvas);
+            return offCanvas;
+        }
+
+        // Tek bir sayfayı çizer
+        function drawPage(index, x, y, targetCtx) {
+            const totalImages = getTotalImages();
+
+            // Gerçek sayfa indeksini bul (Negatif veya taşan indeksleri düzelt)
+            let actualIndex = index % totalImages;
+            if (actualIndex < 0) actualIndex += totalImages;
+
+            targetCtx.save();
+
+            // Hafif gölge
+            targetCtx.shadowColor = 'rgba(0,0,0,0.8)';
+            targetCtx.shadowBlur = 30;
+            targetCtx.shadowOffsetX = 10;
+            targetCtx.shadowOffsetY = 10;
+
+            if (APP_CONFIG.useDemoMode) {
+                const demoCanvas = getDemoPage(actualIndex);
+                targetCtx.drawImage(demoCanvas, x, y, pageW, pageH);
+            } else {
+                const img = getRealImage(actualIndex);
+                if (img.loaded) {
+                    targetCtx.drawImage(img, x, y, pageW, pageH);
+                } else {
+                    // Yüklenene kadar yer tutucu çiz
+                    targetCtx.fillStyle = APP_CONFIG.pageBgColor;
+                    targetCtx.fillRect(x, y, pageW, pageH);
+                    targetCtx.shadowColor = 'transparent'; // Yazıda gölge olmasın
+                    targetCtx.fillStyle = '#888';
+                    targetCtx.font = '20px Arial';
+                    targetCtx.textAlign = 'center';
+                    targetCtx.fillText('Loading...', x + pageW / 2, y + pageH / 2);
+                }
+            }
+            targetCtx.restore();
+        }
+
+        // --- ANİMASYON VE FİZİK DÖNGÜSÜ ---
+
+        function updateLogic(dt) {
+            if (isPlaybackPaused) return;
+
+            const totalImages = getTotalImages();
+
+            // Zaman hesaplaması (Milisecond)
+            const now = performance.now();
+
+            if (APP_CONFIG.reports.length > 1 && now >= nextFolderSwitchAt) {
+                switchToNextReport(now);
+            }
+            updateSwitchProgress(now);
+
+            switch (state) {
+                case 'PAUSED':
+                    // Süre dolduğunda hızlanmaya başla
+                    if (now > stateTimer) {
+                        state = 'SPEEDING_UP';
+                        // Hızlı akma süresini belirle
+                        stateTimer = now + randomRange(APP_CONFIG.minRunTime, APP_CONFIG.maxRunTime);
+                    }
+                    break;
+
+                case 'SPEEDING_UP':
+                    currentSpeed += APP_CONFIG.acceleration;
+                    if (currentSpeed >= APP_CONFIG.maxSpeed) {
+                        currentSpeed = APP_CONFIG.maxSpeed;
+                        state = 'FAST_FORWARD';
+                    }
+                    break;
+
+                case 'FAST_FORWARD':
+                    // Süre dolduğunda yavaşlamaya başla
+                    if (now > stateTimer) {
+                        state = 'SLOWING_DOWN';
+                    }
+                    break;
+
+                case 'SLOWING_DOWN':
+                    currentSpeed *= APP_CONFIG.deceleration;
+                    // Hız çok düştüğünde en yakın sayfaya "kitlenme" (snapping) moduna geç
+                    if (currentSpeed < 0.03) {
+                        state = 'SNAPPING';
+                    }
+                    break;
+
+                case 'SNAPPING':
+                    // Hedef: En yakın tam sayı indeks
+                    let targetPos = Math.round(currentPosition);
+
+                    // Hedefe yumuşak yaklaşım (Easing)
+                    let diff = targetPos - currentPosition;
+                    currentPosition += diff * 0.1;
+                    currentSpeed = 0;
+
+                    // Yeterince yaklaştıysak dur
+                    if (Math.abs(diff) < 0.005) {
+                        currentPosition = targetPos;
+                        state = 'PAUSED';
+                        // Okuma/bekleme süresini belirle
+                        stateTimer = now + randomRange(APP_CONFIG.minPauseTime, APP_CONFIG.maxPauseTime);
+                    }
+                    break;
+            }
+
+            // Pozisyonu hız kadar ileri al
+            if (state !== 'SNAPPING') {
+                currentPosition += currentSpeed;
+            }
+
+            // Döngüsel Sonsuzluk (Sınırı aşarsa başa sar, çok büyük sayılardan kaçın)
+            if (currentPosition >= totalImages) {
+                currentPosition -= totalImages;
+            }
+        }
+
+        function renderScene(targetCtx) {
+            // Arka planı temizle
+            targetCtx.fillStyle = '#000000';
+            targetCtx.fillRect(0, 0, width, height);
+
+            const centerY = (height - pageH) / 2;
+            const centerX = width / 2;
+
+            // Hangi sayfaların ekranda görüneceğini hesapla
+            // currentPosition = 5.2 demek: 5. sayfa merkezden biraz sola kaymış demek.
+            const centerIndex = Math.floor(currentPosition);
+            const offsetFraction = currentPosition - centerIndex; // 0 ile 1 arası
+
+            // Tam merkeze denk gelen x koordinatı (kayma miktarı çıkarılarak)
+            const baseX = centerX - (pageW / 2) - (offsetFraction * (pageW + gap));
+
+            // "Show Only 3 Pages" açıksa her durumda sadece 3 sayfa çiz.
+            const minOffset = APP_CONFIG.showOnlyThreePages ? -1 : -2;
+            const maxOffset = APP_CONFIG.showOnlyThreePages ? 1 : 3;
+            for (let i = minOffset; i <= maxOffset; i++) {
+
+                let drawIndex = centerIndex + i;
+                let drawX = baseX + (i * (pageW + gap));
+
+                // Sadece ekranın içindeyse çiz (Optimizasyon)
+                if (drawX + pageW > -100 && drawX < width + 100) {
+                    drawPage(drawIndex, drawX, centerY, targetCtx);
+                }
+            }
+
+            // Hız efektleri: Çok hızlıyken ekran kenarlarına hareket bulanıklığı veya karanlık eklenebilir.
+            if (currentSpeed > 0.5) {
+                targetCtx.fillStyle = `rgba(0,0,0, ${(currentSpeed - 0.5) * 0.5})`;
+                targetCtx.fillRect(0, 0, width, height);
+            }
+        }
+
+        function applyVerticalKeystone(sourceCanvas, targetCtx) {
+            const k = APP_CONFIG.verticalKeystone;
+            if (Math.abs(k) < 0.0001) {
+                targetCtx.drawImage(sourceCanvas, 0, 0);
+                return;
+            }
+
+            // Satır satır genişlik ölçekleyerek üst/alt yatay keystone düzeltmesi uygula.
+            const stripH = 2;
+            for (let y = 0; y < height; y += stripH) {
+                const h = Math.min(stripH, height - y);
+                const t = ((y + (h * 0.5)) / height) * 2 - 1; // üst:-1 ... alt:+1
+                const rowScaleX = 1 + (k * t);
+                const dstW = width * rowScaleX;
+                const dstX = (width - dstW) * 0.5;
+                targetCtx.drawImage(sourceCanvas, 0, y, width, h, dstX, y, dstW, h);
+            }
+        }
+
+        function render() {
+            renderScene(sceneCtx);
+            ctx.clearRect(0, 0, width, height);
+            applyVerticalKeystone(sceneCanvas, ctx);
+        }
+
+        function loop(timestamp) {
+            let dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            updateLogic(dt);
+            updateProjectorAudio();
+            render();
+
+            requestAnimationFrame(loop);
+        }
+
+        // --- KONTROL PANELİ VE ETKİLEŞİM ---
+        const DEFAULT_CONTROL_VALUES = {
+            'ctrl-demo': APP_CONFIG.useDemoMode,
+            'ctrl-speed': '0.8',
+            'ctrl-pause-min': '3',
+            'ctrl-pause-max': '7',
+            'ctrl-folder-switch': '60',
+            'ctrl-v-keystone': '0',
+            'ctrl-zoom': '100',
+            'ctrl-gap': '5',
+            'ctrl-vignette': '0',
+            'ctrl-pitch-motor': '46',
+            'ctrl-pitch-sub': '23',
+            'ctrl-pitch-tick': '120',
+            'ctrl-pitch-standby': '820',
+            'ctrl-show-title': true,
+            'ctrl-show-folder': true,
+            'ctrl-show-progress': true,
+            'ctrl-progress-width': '62'
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'd') {
+                document.getElementById('control-panel').classList.toggle('show');
+            }
+        });
+
+        // Tablet/mouse kontrolü: panel dışına tek tık ile aç/kapat.
+        document.addEventListener('pointerdown', (e) => {
+            const panelEl = document.getElementById('control-panel');
+            if (panelEl.contains(e.target)) return;
+            panelEl.classList.toggle('show');
+        });
+
+        // Arayüz Bağlantıları
+        document.getElementById('ctrl-demo').addEventListener('change', (e) => {
+            APP_CONFIG.useDemoMode = e.target.checked;
+        });
+
+        document.getElementById('ctrl-speed').addEventListener('input', (e) => {
+            APP_CONFIG.maxSpeed = parseFloat(e.target.value);
+            document.getElementById('val-speed').innerText = APP_CONFIG.maxSpeed.toFixed(1);
+        });
+
+        document.getElementById('ctrl-pause-min').addEventListener('input', (e) => {
+            APP_CONFIG.minPauseTime = parseInt(e.target.value) * 1000;
+            document.getElementById('val-pause-min').innerText = e.target.value;
+        });
+
+        document.getElementById('ctrl-pause-max').addEventListener('input', (e) => {
+            APP_CONFIG.maxPauseTime = parseInt(e.target.value) * 1000;
+            document.getElementById('val-pause-max').innerText = e.target.value;
+        });
+
+        document.getElementById('ctrl-folder-switch').addEventListener('input', (e) => {
+            const seconds = parseInt(e.target.value, 10);
+            APP_CONFIG.folderSwitchInterval = seconds * 1000;
+            document.getElementById('val-folder-switch').innerText = String(seconds);
+            nextFolderSwitchAt = performance.now() + APP_CONFIG.folderSwitchInterval;
+        });
+
+        document.getElementById('ctrl-v-keystone').addEventListener('input', (e) => {
+            const sliderValue = parseInt(e.target.value, 10);
+            APP_CONFIG.verticalKeystone = sliderValue / 100;
+            document.getElementById('val-v-keystone').innerText = `${sliderValue}%`;
+        });
+
+        document.getElementById('ctrl-zoom').addEventListener('input', (e) => {
+            const sliderValue = parseInt(e.target.value, 10);
+            APP_CONFIG.pageScale = sliderValue / 100;
+            document.getElementById('val-zoom').innerText = `${sliderValue}%`;
+            resize();
+        });
+
+        document.getElementById('ctrl-gap').addEventListener('input', (e) => {
+            const sliderValue = parseInt(e.target.value, 10);
+            APP_CONFIG.pageGapScale = sliderValue / 100;
+            document.getElementById('val-gap').innerText = `${sliderValue}%`;
+            resize();
+        });
+
+        function applyVignetteSettings() {
+            const opacity = Math.max(0, Math.min(1, APP_CONFIG.vignetteIntensity));
+            vignetteEl.style.opacity = String(opacity);
+        }
+
+        document.getElementById('ctrl-vignette').addEventListener('input', (e) => {
+            const sliderValue = parseInt(e.target.value, 10);
+            APP_CONFIG.vignetteIntensity = sliderValue / 100;
+            document.getElementById('val-vignette').innerText = `${sliderValue}%`;
+            applyVignetteSettings();
+        });
+
+        document.getElementById('ctrl-pitch-motor').addEventListener('input', (e) => {
+            APP_CONFIG.motorBaseFreq = parseInt(e.target.value, 10);
+            document.getElementById('val-pitch-motor').innerText = `${APP_CONFIG.motorBaseFreq} Hz`;
+        });
+
+        document.getElementById('ctrl-pitch-sub').addEventListener('input', (e) => {
+            APP_CONFIG.motorSubBaseFreq = parseInt(e.target.value, 10);
+            document.getElementById('val-pitch-sub').innerText = `${APP_CONFIG.motorSubBaseFreq} Hz`;
+        });
+
+        document.getElementById('ctrl-pitch-tick').addEventListener('input', (e) => {
+            APP_CONFIG.tickToneFreq = parseInt(e.target.value, 10);
+            document.getElementById('val-pitch-tick').innerText = `${APP_CONFIG.tickToneFreq} Hz`;
+        });
+
+        document.getElementById('ctrl-pitch-standby').addEventListener('input', (e) => {
+            APP_CONFIG.standbyBaseFreq = parseInt(e.target.value, 10);
+            document.getElementById('val-pitch-standby').innerText = `${APP_CONFIG.standbyBaseFreq} Hz`;
+        });
+
+        document.getElementById('ctrl-show-title').addEventListener('change', (e) => {
+            APP_CONFIG.showTopTitle = e.target.checked;
+            applyOverlaySettings();
+        });
+
+        document.getElementById('ctrl-show-folder').addEventListener('change', (e) => {
+            APP_CONFIG.showFolderLabel = e.target.checked;
+            applyOverlaySettings();
+        });
+
+        document.getElementById('ctrl-show-progress').addEventListener('change', (e) => {
+            APP_CONFIG.showProgressBar = e.target.checked;
+            applyOverlaySettings();
+        });
+
+        document.getElementById('ctrl-show-only-three-pages').addEventListener('change', (e) => {
+            APP_CONFIG.showOnlyThreePages = e.target.checked;
+        });
+
+        document.getElementById('ctrl-progress-width').addEventListener('input', (e) => {
+            APP_CONFIG.progressBarWidthVw = parseInt(e.target.value, 10);
+            document.getElementById('val-progress-width').innerText = `${APP_CONFIG.progressBarWidthVw}vw`;
+            applyOverlaySettings();
+        });
+
+        document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+            toggleAudio();
+        });
+
+        document.getElementById('btn-playback-toggle').addEventListener('click', () => {
+            isPlaybackPaused = !isPlaybackPaused;
+            const playbackBtn = document.getElementById('btn-playback-toggle');
+
+            if (isPlaybackPaused) {
+                state = 'PAUSED';
+                currentSpeed = 0;
+                playbackBtn.innerText = 'Resume';
+            } else {
+                stateTimer = performance.now() + 300;
+                playbackBtn.innerText = 'Pause';
+            }
+        });
+
+        Object.keys(DEFAULT_CONTROL_VALUES).forEach((controlId) => {
+            const controlEl = document.getElementById(controlId);
+            if (!controlEl) return;
+            if (controlEl.type === 'checkbox') return;
+
+            const groupEl = controlEl.closest('.control-group');
+            if (!groupEl) return;
+
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'mini-reset';
+            resetBtn.type = 'button';
+            resetBtn.innerText = 'Reset';
+            resetBtn.addEventListener('click', () => {
+                const defaultValue = DEFAULT_CONTROL_VALUES[controlId];
+                if (controlEl.type === 'checkbox') {
+                    controlEl.checked = Boolean(defaultValue);
+                    controlEl.dispatchEvent(new Event('change', { bubbles: true }));
+                } else {
+                    controlEl.value = String(defaultValue);
+                    controlEl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            if (controlEl.type === 'range') {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'control-input-row';
+                controlEl.parentNode.insertBefore(rowEl, controlEl);
+                rowEl.appendChild(controlEl);
+                rowEl.appendChild(resetBtn);
+            } else {
+                groupEl.appendChild(resetBtn);
+            }
+        });
+
+        // Başlangıç Ayarı
+        document.getElementById('ctrl-demo').checked = APP_CONFIG.useDemoMode;
+        document.getElementById('ctrl-folder-switch').value = String(APP_CONFIG.folderSwitchInterval / 1000);
+        document.getElementById('val-folder-switch').innerText = String(APP_CONFIG.folderSwitchInterval / 1000);
+        document.getElementById('ctrl-v-keystone').value = String(APP_CONFIG.verticalKeystone * 100);
+        document.getElementById('val-v-keystone').innerText = `${Math.round(APP_CONFIG.verticalKeystone * 100)}%`;
+        document.getElementById('ctrl-zoom').value = String(Math.round(APP_CONFIG.pageScale * 100));
+        document.getElementById('val-zoom').innerText = `${Math.round(APP_CONFIG.pageScale * 100)}%`;
+        document.getElementById('ctrl-gap').value = String(Math.round(APP_CONFIG.pageGapScale * 100));
+        document.getElementById('val-gap').innerText = `${Math.round(APP_CONFIG.pageGapScale * 100)}%`;
+        document.getElementById('ctrl-vignette').value = String(Math.round(APP_CONFIG.vignetteIntensity * 100));
+        document.getElementById('val-vignette').innerText = `${Math.round(APP_CONFIG.vignetteIntensity * 100)}%`;
+        document.getElementById('ctrl-pitch-motor').value = String(APP_CONFIG.motorBaseFreq);
+        document.getElementById('val-pitch-motor').innerText = `${APP_CONFIG.motorBaseFreq} Hz`;
+        document.getElementById('ctrl-pitch-sub').value = String(APP_CONFIG.motorSubBaseFreq);
+        document.getElementById('val-pitch-sub').innerText = `${APP_CONFIG.motorSubBaseFreq} Hz`;
+        document.getElementById('ctrl-pitch-tick').value = String(APP_CONFIG.tickToneFreq);
+        document.getElementById('val-pitch-tick').innerText = `${APP_CONFIG.tickToneFreq} Hz`;
+        document.getElementById('ctrl-pitch-standby').value = String(APP_CONFIG.standbyBaseFreq);
+        document.getElementById('val-pitch-standby').innerText = `${APP_CONFIG.standbyBaseFreq} Hz`;
+        document.getElementById('ctrl-show-title').checked = APP_CONFIG.showTopTitle;
+        document.getElementById('ctrl-show-folder').checked = APP_CONFIG.showFolderLabel;
+        document.getElementById('ctrl-show-progress').checked = APP_CONFIG.showProgressBar;
+        document.getElementById('ctrl-show-only-three-pages').checked = APP_CONFIG.showOnlyThreePages;
+        document.getElementById('ctrl-progress-width').value = String(APP_CONFIG.progressBarWidthVw);
+        document.getElementById('val-progress-width').innerText = `${APP_CONFIG.progressBarWidthVw}vw`;
+        applyVignetteSettings();
+        applyOverlaySettings();
+        updateFolderLabel();
+        stateTimer = performance.now() + 2000; // İlk 2 saniye beklesin, sonra başlasın
+        nextFolderSwitchAt = performance.now() + APP_CONFIG.folderSwitchInterval;
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+
+</html>
