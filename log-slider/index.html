@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IDExAI.26 Log Slider</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <style>
+    :root {
+      --bg: transparent;
+      --page-bg: #f4f4f0;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    #projector-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="projector-canvas"></canvas>
+
+  <script>
+    const APP_CONFIG = {
+      folderPath: './log-sample-img/',
+      imageFiles: [
+        '01.jpg', '010.jpg', '0100.jpg', '0101.jpg', '0102.jpg', '0103.jpg', '0104.jpg', '0105.jpg',
+        '0106.jpg', '0107.jpg', '0108.jpg', '0109.jpg', '011.jpg', '0110.jpg', '0111.jpg', '0112.jpg',
+        '0113.jpg', '0114.jpg', '0115.jpg', '0116.jpg', '0117.jpg', '0118.jpg', '0119.jpg', '012.jpg',
+        '0120.jpg', '0121.jpg', '0122.jpg', '0123.jpg', '0124.jpg', '0125.jpg', '0126.jpg', '0127.jpg',
+        '0128.jpg', '0129.jpg', '013.jpg', '0130.jpg', '0131.jpg', '0132.jpg', '0133.jpg', '0134.jpg',
+        '0135.jpg', '0136.jpg', '0137.jpg', '0138.jpg', '0139.jpg', '014.jpg', '0140.jpg', '0141.jpg',
+        '0142.jpg', '0143.jpg', '0144.jpg', '0145.jpg', '0146.jpg', '0147.jpg', '0148.jpg', '0149.jpg',
+        '015.jpg', '0150.jpg', '0151.jpg', '0152.jpg', '0153.jpg', '0154.jpg', '0155.jpg', '0156.jpg',
+        '0157.jpg', '0158.jpg', '0159.jpg', '016.jpg', '0160.jpg', '0161.jpg', '0162.jpg', '0163.jpg',
+        '0164.jpg', '0165.jpg', '0166.jpg', '0167.jpg', '0168.jpg', '0169.jpg', '017.jpg', '0170.jpg',
+        '0171.jpg', '0172.jpg', '0173.jpg', '0174.jpg', '0175.jpg', '0176.jpg', '0177.jpg', '0178.jpg',
+        '0179.jpg', '018.jpg', '0180.jpg', '0181.jpg', '0182.jpg', '0183.jpg', '0184.jpg', '0185.jpg',
+        '0186.jpg', '0187.jpg', '0188.jpg', '0189.jpg', '019.jpg', '0190.jpg', '0191.jpg', '0192.jpg',
+        '0193.jpg', '0194.jpg', '0195.jpg', '0196.jpg', '0197.jpg', '0198.jpg', '0199.jpg', '02.jpg',
+        '020.jpg', '0200.jpg', '0201.jpg', '0202.jpg', '0203.jpg', '0204.jpg', '0205.jpg', '0206.jpg',
+        '0207.jpg', '0208.jpg', '0209.jpg', '021.jpg', '0210.jpg', '0211.jpg', '0212.jpg', '022.jpg',
+        '023.jpg', '024.jpg', '025.jpg', '026.jpg', '027.jpg', '028.jpg', '029.jpg', '03.jpg',
+        '030.jpg', '031.jpg', '032.jpg', '033.jpg', '034.jpg', '035.jpg', '036.jpg', '037.jpg',
+        '038.jpg', '039.jpg', '04.jpg', '040.jpg', '041.jpg', '042.jpg', '043.jpg', '044.jpg',
+        '045.jpg', '046.jpg', '047.jpg', '048.jpg', '049.jpg', '05.jpg', '050.jpg', '051.jpg',
+        '052.jpg', '053.jpg', '054.jpg', '055.jpg', '056.jpg', '057.jpg', '058.jpg', '059.jpg',
+        '06.jpg', '060.jpg', '061.jpg', '062.jpg', '063.jpg', '064.jpg', '065.jpg', '066.jpg',
+        '067.jpg', '068.jpg', '069.jpg', '07.jpg', '070.jpg', '071.jpg', '072.jpg', '073.jpg',
+        '074.jpg', '075.jpg', '076.jpg', '077.jpg', '078.jpg', '079.jpg', '08.jpg', '080.jpg',
+        '081.jpg', '082.jpg', '083.jpg', '084.jpg', '085.jpg', '086.jpg', '087.jpg', '088.jpg',
+        '089.jpg', '09.jpg', '090.jpg', '091.jpg', '092.jpg', '093.jpg', '094.jpg', '095.jpg',
+        '096.jpg', '097.jpg', '098.jpg', '099.jpg'
+      ],
+      pageBgColor: '#f4f4f0',
+      maxSpeed: 0.8,
+      acceleration: 0.003,
+      deceleration: 0.96,
+      pageScale: 1.0,
+      pageGapScale: 0.05,
+      minRunTime: 2000,
+      maxRunTime: 3000,
+      minPauseTime: 3000,
+      maxPauseTime: 3000,
+      showOnlyThreePages: false,
+      mobileCenterWidthRatio: 0.82,
+      mobileCenterHeightRatio: 0.92
+    };
+
+    APP_CONFIG.totalImages = APP_CONFIG.imageFiles.length;
+
+    const canvas = document.getElementById('projector-canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    let width;
+    let height;
+    let pageW;
+    let pageH;
+    let gap;
+
+    let state = 'PAUSED';
+    let currentPosition = 0;
+    let currentSpeed = 0;
+    let stateTimer = 0;
+    let lastTime = 0;
+    let manualPause = false;
+    let isPointerDown = false;
+    let isDragging = false;
+    let activePointerId = null;
+    let dragStartX = 0;
+    let dragStartPosition = 0;
+
+    const DRAG_THRESHOLD = 4;
+
+    const imageCache = new Map();
+
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+
+      const isMobileViewport = width <= 767;
+
+      if (isMobileViewport) {
+        const maxCenterW = width * APP_CONFIG.mobileCenterWidthRatio;
+        const maxCenterH = height * APP_CONFIG.mobileCenterHeightRatio;
+        pageW = Math.min(maxCenterW, maxCenterH / 1.414) * APP_CONFIG.pageScale;
+        pageH = pageW * 1.414;
+      } else {
+        pageH = height * APP_CONFIG.pageScale;
+        pageW = pageH / 1.414;
+      }
+
+      gap = pageW * APP_CONFIG.pageGapScale;
+    }
+
+    function getImage(index) {
+      const key = `${APP_CONFIG.folderPath}::${index}`;
+      if (imageCache.has(key)) return imageCache.get(key);
+
+      if (imageCache.size > 60) {
+        const firstKey = imageCache.keys().next().value;
+        imageCache.delete(firstKey);
+      }
+
+      const img = new Image();
+      img.src = APP_CONFIG.folderPath + APP_CONFIG.imageFiles[index];
+      img.loaded = false;
+      img.onload = () => { img.loaded = true; };
+      img.onerror = () => { img.error = true; };
+      imageCache.set(key, img);
+      return img;
+    }
+
+    function drawPage(index, x, y) {
+      let actualIndex = index % APP_CONFIG.totalImages;
+      if (actualIndex < 0) actualIndex += APP_CONFIG.totalImages;
+
+      const img = getImage(actualIndex);
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetX = 10;
+      ctx.shadowOffsetY = 10;
+
+      if (img.loaded) {
+        ctx.drawImage(img, x, y, pageW, pageH);
+      } else {
+        ctx.fillStyle = APP_CONFIG.pageBgColor;
+        ctx.fillRect(x, y, pageW, pageH);
+      }
+
+      ctx.restore();
+    }
+
+    function updateLogic(now) {
+      if (manualPause) {
+        currentSpeed = 0;
+        return;
+      }
+
+      switch (state) {
+        case 'PAUSED':
+          if (now > stateTimer) {
+            state = 'SPEEDING_UP';
+            stateTimer = now + randomRange(APP_CONFIG.minRunTime, APP_CONFIG.maxRunTime);
+          }
+          break;
+
+        case 'SPEEDING_UP':
+          currentSpeed += APP_CONFIG.acceleration;
+          if (currentSpeed >= APP_CONFIG.maxSpeed) {
+            currentSpeed = APP_CONFIG.maxSpeed;
+            state = 'FAST_FORWARD';
+          }
+          break;
+
+        case 'FAST_FORWARD':
+          if (now > stateTimer) {
+            state = 'SLOWING_DOWN';
+          }
+          break;
+
+        case 'SLOWING_DOWN':
+          currentSpeed *= APP_CONFIG.deceleration;
+          if (currentSpeed < 0.03) {
+            state = 'SNAPPING';
+          }
+          break;
+
+        case 'SNAPPING': {
+          const targetPos = Math.round(currentPosition);
+          const diff = targetPos - currentPosition;
+          currentPosition += diff * 0.1;
+          currentSpeed = 0;
+
+          if (Math.abs(diff) < 0.005) {
+            currentPosition = targetPos;
+            state = 'PAUSED';
+            stateTimer = now + randomRange(APP_CONFIG.minPauseTime, APP_CONFIG.maxPauseTime);
+          }
+          break;
+        }
+      }
+
+      if (state !== 'SNAPPING') {
+        currentPosition += currentSpeed;
+      }
+
+      if (currentPosition >= APP_CONFIG.totalImages) {
+        currentPosition -= APP_CONFIG.totalImages;
+      }
+
+      if (currentPosition < 0) {
+        currentPosition += APP_CONFIG.totalImages;
+      }
+    }
+
+    function render() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, width, height);
+
+      const centerY = (height - pageH) / 2;
+      const centerX = width / 2;
+      const centerIndex = Math.floor(currentPosition);
+      const offsetFraction = currentPosition - centerIndex;
+      const baseX = centerX - (pageW / 2) - (offsetFraction * (pageW + gap));
+
+      const minOffset = APP_CONFIG.showOnlyThreePages ? -1 : -2;
+      const maxOffset = APP_CONFIG.showOnlyThreePages ? 1 : 3;
+
+      for (let i = minOffset; i <= maxOffset; i++) {
+        const drawIndex = centerIndex + i;
+        const drawX = baseX + (i * (pageW + gap));
+        if (drawX + pageW > -100 && drawX < width + 100) {
+          drawPage(drawIndex, drawX, centerY);
+        }
+      }
+    }
+
+    function loop(timestamp) {
+      lastTime = timestamp - lastTime;
+      const now = performance.now();
+      updateLogic(now);
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    function pauseForInteraction() {
+      manualPause = true;
+      currentSpeed = 0;
+      state = 'PAUSED';
+      stateTimer = Number.POSITIVE_INFINITY;
+    }
+
+    function resumeAfterInteraction() {
+      manualPause = false;
+      state = 'SNAPPING';
+    }
+
+    function onPointerDown(event) {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (isPointerDown) return;
+
+      isPointerDown = true;
+      isDragging = false;
+      activePointerId = event.pointerId;
+      dragStartX = event.clientX;
+      dragStartPosition = currentPosition;
+      pauseForInteraction();
+
+      if (canvas.setPointerCapture) {
+        canvas.setPointerCapture(event.pointerId);
+      }
+      event.preventDefault();
+    }
+
+    function onPointerMove(event) {
+      if (!isPointerDown || event.pointerId !== activePointerId) return;
+
+      const deltaX = event.clientX - dragStartX;
+      if (Math.abs(deltaX) > DRAG_THRESHOLD) {
+        isDragging = true;
+      }
+
+      if (isDragging) {
+        const perPixel = 1 / (pageW + gap);
+        currentPosition = dragStartPosition - (deltaX * perPixel);
+
+        if (currentPosition >= APP_CONFIG.totalImages) {
+          currentPosition %= APP_CONFIG.totalImages;
+        }
+        if (currentPosition < 0) {
+          currentPosition = (currentPosition % APP_CONFIG.totalImages) + APP_CONFIG.totalImages;
+        }
+      }
+
+      event.preventDefault();
+    }
+
+    function onPointerEnd(event) {
+      if (!isPointerDown || event.pointerId !== activePointerId) return;
+
+      if (canvas.releasePointerCapture && canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+
+      isPointerDown = false;
+      isDragging = false;
+      activePointerId = null;
+      resumeAfterInteraction();
+      event.preventDefault();
+    }
+
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerEnd);
+    canvas.addEventListener('pointercancel', onPointerEnd);
+    resize();
+    stateTimer = performance.now() + 2000;
+    requestAnimationFrame(loop);
+  </script>
+</body>
+
+</html>
