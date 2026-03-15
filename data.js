@@ -50,7 +50,7 @@ const translations = {
 
         section_collection: "Sergi",
         collection_h3: "Öğrenci<br>Projeleri",
-        collection_desc: "Sergi iki projeye ayrılmıştır:<br>2-3-4. sınıflar için Sıcak İçecek Hazırlama Ürün Tasarımı,<br>1. sınıf için Yumurta Düşürme.",
+        collection_desc: "Sergi iki projeye ayrılmıştır:<br>2-3-4. sınıflar için Sıcak İçecek Hazırlama Ürün Tasarımı,<br>1. sınıf için Yumurta Düşürme Projesi.",
         collection_btn_eggdrop: "Yumurta Düşürme Projesi Sergisine Git",
         collection_btn_hotbeverage: "Sıcak İçecek Hazırlama Ürün Tasarım Projesi Sergisine Git",
         eggdrop_title: "Yumurta Düşürme | 1. Sınıf Projesi",
@@ -130,7 +130,7 @@ const translations = {
 
         section_collection: "Exhibition",
         collection_h3: "Student<br>Projects",
-        collection_desc: "The exhibition is split into two tracks:<br>Hot Beverage Preparing Electronic Device for Years 2, 3, and 4,<br>and Egg Drop for Year 1.",
+        collection_desc: "The exhibition is split into two tracks:<br>Hot Beverage Preparing Electronic Device for Years 2, 3, and 4,<br>and Egg Drop Project for Year 1.",
         collection_btn_eggdrop: "Go to Egg Drop Project Exhibition",
         collection_btn_hotbeverage: "Go to Hot Beverage Preparing Product Design Exhibition",
         eggdrop_title: "Egg Drop | Year 1 Project",
