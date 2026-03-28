@@ -12,7 +12,7 @@ const translations = {
         hero_btn: "Sergiyi İncele",
 
         section_manifesto: "Program",
-        seed_program_title: "Dönüştürü Eğitim Tohumlama Programı",
+        seed_program_title: "Dönüştürücü Eğitim Tohumlama Programı",
         seed_program_desc: "IDExAI.26, Özyeğin Üniversitesi Dönüştürücü Eğitim Tohumlama Programı kapsamında desteklenen bir eğitim girişimidir. Program, \"Yapay Zekâ ile Öğrenme\" teması doğrultusunda üniversitede yenilikçi öğrenme modellerinin geliştirilmesini teşvik etmektedir.",
         manifesto_h3: "IDExAI.26, üretken yapay zekânın tasarım sürecinin araştırma, fikir geliştirme, konsept oluşturma, prototipleme, test ve iletişim aşamalarına etkili ve sorumlu şekilde entegre edilmesini hedefleyen <span class=\"italic font-normal\">yeni bir eğitim modelidir.</span>",
         manifesto_p1: "Program, Beko eski Endüstriyel Tasarım İcra Direktörü Serdal Korkut Avcı’nın danışmanlığında; bölümümüzün öğretim üyeleri, stüdyo yürütücüleri ve araştırma ekibinin katkılarıyla yürütülmüştür.",
